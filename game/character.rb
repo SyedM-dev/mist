@@ -1,12 +1,17 @@
 class Character
   attr_reader :world_x, :world_y
 
-  SPEED = 2.5
+  SPEED = 3
   SIZE = [25, 30]
 
   def initialize
     @world_x = 60.0
     @world_y = 60.0
+
+    start_room_coords = $bus.get(:start_room_coords)
+    if start_room_coords
+      @world_x, @world_y = [(start_room_coords[0] + 2) * 60 + 30, (start_room_coords[1] + 2) * 60 + 30]
+    end
 
     # Load the full sheet as tiles
     sheet = Gosu::Image.load_tiles("assets/images/player.png", 20, 40, retro: true)
@@ -31,6 +36,10 @@ class Character
 
     @current_animation = :idle_front
     @facing = :front
+
+    $bus.on_retrievable(:player_position) do
+      next [@world_x, @world_y]
+    end
   end
 
   def rect
@@ -79,16 +88,22 @@ class Character
     dx *= SPEED
     dy *= SPEED
 
-    # Horizontal
-    @world_x += dx
-    if $bus.get(:collides?, rect)&.include?(:wall)
-      @world_x -= dx
-    end
+    steps = SPEED.ceil
+    step_dx = dx / steps.to_f
+    step_dy = dy / steps.to_f
 
-    # Vertical
-    @world_y += dy
-    if $bus.get(:collides?, rect)&.include?(:wall)
-      @world_y -= dy
+    steps.times do
+      # X axis
+      @world_x += step_dx
+      if ($bus.get(:collides?, rect) & [:wall, :object])&.any?
+        @world_x -= step_dx
+      end
+
+      # Y axis
+      @world_y += step_dy
+      if ($bus.get(:collides?, rect) & [:wall, :object])&.any?
+        @world_y -= step_dy
+      end
     end
 
     # teleport to boss room for debug purposes

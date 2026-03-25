@@ -5,6 +5,10 @@ class Maze
     @maze = MazeData.new(80, 80)
     @spritesheet = Gosu::Image.load_tiles("assets/images/walls.png", 20, 40, retro: true)
     puts @spritesheet.size
+
+    $bus.on_retrievable(:maze_solve) do |x1, y1, x2, y2|
+      next @maze.solve(x1, y1, x2, y2)
+    end
   end
 
   def collides?(rect)
@@ -64,8 +68,8 @@ class Maze
     shapes
   end
 
-  def draw(camera)
-    cam_x, cam_y = camera
+  def draw
+    cam_x, cam_y = $bus.get(:camera_pos) || [0, 0]
     tile_size = 60
     scale = 3
     screen_width, screen_height = SCREEN_SIZE

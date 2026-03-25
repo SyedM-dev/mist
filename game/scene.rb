@@ -1,5 +1,7 @@
 require_relative 'state'
 require_relative 'maze'
+require_relative 'placeables/base'
+require_relative 'enemy/handler'
 require_relative 'character'
 
 require 'perlin'
@@ -8,11 +10,13 @@ class Game < Scene
   def initialize
     super
     @font = Gosu::Font.new(24)
-    @noise = Perlin::Generator.new(rand(1000), 1.0, 1)
+    @noise = Perlin::Generator.new(rand(1...1000), 1.0, 1)
     @floor_image = Gosu::Image.new("assets/images/floor.png", retro: true)
 
     @maze = Maze.new
     @character = Character.new
+    @enemies = EnemyHandler.new
+    @objects = ObjectHandler.new
 
     @camera = [0, 0]
 
@@ -20,19 +24,27 @@ class Game < Scene
       @camera = pos
     end
 
+    $bus.on_retrievable(:camera_pos) do
+      next @camera
+    end
+
     $bus.on_retrievable(:collides?) do |rect|
       collisions = []
       collisions << :wall if @maze.collides?(rect)
       collisions << :character if @character.collides?(rect)
+      collisions << :enemy if @enemies.collides?(rect)
+      collisions << :object if @objects.collides?(rect)
       next collisions
     end
   end
 
   def draw
     draw_floor
-    @maze.draw(@camera)
+    @maze.draw
     @character.draw
-    draw_fog(@camera)
+    @enemies.draw
+    @objects.draw
+    draw_fog!
     draw_debug! if DEBUG
   end
 
@@ -51,11 +63,12 @@ class Game < Scene
     end
 
     @font.draw_text("FPS: #{@fps}", 5, 5, Float::INFINITY, 1, 1, Gosu::Color::YELLOW)
-    @font.draw_text("Player: [#{@character.world_x.round}, #{@character.world_y.round}]", 5, 30, Float::INFINITY, 1, 1, Gosu::Color::YELLOW)
+    world_x, world_y = $bus.get(:player_position)&.map(&:round) || [0, 0]
+    @font.draw_text("Player: [#{world_x}, #{world_y}]", 5, 30, Float::INFINITY, 1, 1, Gosu::Color::YELLOW)
   end
 
-  def draw_fog(camera)
-    cam_x, cam_y = camera
+  def draw_fog!
+    cam_x, cam_y = @camera
     cell = 10
     i_radius = 90.0
     o_radius = 400.0
@@ -114,6 +127,8 @@ class Game < Scene
 
   def update
     @character.update
+    @enemies.update
+    @objects.update
   end
 
   def button_down(id, _pos)

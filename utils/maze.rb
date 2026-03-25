@@ -1,15 +1,22 @@
 class MazeData
-  def initialize(width, height)
+  def initialize(width, height, standalone: false)
     @width = width
     @height = height
 
     @grid = Array.new(height) { Array.new(width, 0) }
 
     @boss_rooms = []
+    @start_room = nil
 
     crate_rooms!
     carve_passages_from(0, 0)
     fix_room_entrances!
+
+    return if standalone
+
+    $bus.on_retrievable(:start_room_coords) do
+      next @start_room ? [@start_room[0] * 2 + 1, @start_room[1] * 2 + 1] : nil
+    end
 
     return unless DEBUG
 
@@ -17,6 +24,60 @@ class MazeData
     $bus.on_retrievable(:boss_room_coords) do
       next @boss_rooms.first ? [@boss_rooms.first[0] * 2 + 1, @boss_rooms.first[1] * 2 + 1] : nil
     end
+  end
+
+  def solve(x1, y1, x2, y2)
+    # explain why dijkstra's is fine here: 
+      # A* hueristics make it possible to chose a longer path through rooms instead of a shorter path through corridors, which is not what we want for enemy pathfinding
+      # Dijkstra's is also simpler to implement since we don't need to worry about the heuristic function, and the maze is not large enough for performance to be a concern
+
+    distances = Array.new(@height) { Array.new(@width, Float::INFINITY) }
+    visited = Array.new(@height) { Array.new(@width, false) }
+    previous = Array.new(@height) { Array.new(@width, nil) }
+    distances[y1][x1] = 0
+
+    queue = [[y1, x1]]
+
+    while !queue.empty?
+      cy, cx = queue.shift
+
+      next if visited[cy][cx]
+      visited[cy][cx] = true
+
+      return build_path(previous, x1, y1, x2, y2) if cx == x2 && cy == y2
+
+      # can check NSEW walls here to determine which neighbors to add to the queue (no need to check teh neighbors)
+      [N, S, E, W].each do |direction|
+        next if (@grid[cy][cx] & direction) == 0 # wall in this direction
+
+        nx, ny = cx + DX[direction], cy + DY[direction]
+
+        next unless ny.between?(0, @height - 1) && nx.between?(0, @width - 1)
+
+        alt = distances[cy][cx] + 1
+        if alt < distances[ny][nx]
+          distances[ny][nx] = alt
+          previous[ny][nx] = [cx, cy]
+          queue << [ny, nx]
+        end
+      end
+    end
+
+    return nil
+  end
+
+  def build_path(previous, x1, y1, x2, y2)
+    path = []
+    cx, cy = x2, y2
+
+    while cx != x1 || cy != y1
+      return nil unless previous[cy][cx]
+      path << [cx, cy]
+      cx, cy = previous[cy][cx]
+    end
+
+    path << [x1, y1]
+    path.reverse!
   end
 
   def width
@@ -114,7 +175,7 @@ class MazeData
   end
 
   def fix_room_entrances!
-    @boss_rooms.each do |x, y|
+    (@boss_rooms + [@start_room]).each do |x, y|
       @grid[y][x + 1] |= N
       @grid[y - 1][x + 1] |= S
     end
@@ -123,10 +184,11 @@ class MazeData
   def crate_rooms!
     base = Math.sqrt(@width * @height / 200.0).round
     num_rooms = rand((base - 1)..(base))
-    num_rooms = 1 if num_rooms < 1
+    num_rooms = (num_rooms < 1 ? 1 : num_rooms) + 1 # for start room
     attempts = 0
+    rooms = []
 
-    while @boss_rooms.size < num_rooms && attempts < 10
+    while rooms.size < num_rooms && attempts < 10
       attempts += 1
 
       x = rand(2..(@width - BOSS_ROOM_SIZE - 2))
@@ -148,8 +210,11 @@ class MazeData
         end
       end
 
-      @boss_rooms << [x, y]
+      rooms << [x, y]
     end
+
+    @start_room = rooms.shift
+    @boss_rooms = rooms
   end
 
   def carve_passages_from(cx, cy)
@@ -168,5 +233,6 @@ class MazeData
 end
 
 if __FILE__ == $0
-
+  maze = MazeData.new(80, 25, standalone: true)
+  maze.print_debug
 end
