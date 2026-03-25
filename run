@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+# Dependencies
+# Gosu for rendering and input
+# Perlin noise for fog effect
+
+load 'main.rb'
