@@ -1,4 +1,6 @@
 class Character
+  attr_reader :world_x, :world_y
+
   SPEED = 2.5
   SIZE = [25, 30]
 
@@ -87,6 +89,14 @@ class Character
     @world_y += dy
     if $bus.get(:collides?, rect)&.include?(:wall)
       @world_y -= dy
+    end
+
+    # teleport to boss room for debug purposes
+    if DEBUG && Gosu.button_down?(Gosu::KB_T)
+      room_coords = $bus.get(:boss_room_coords)
+      if room_coords
+        @world_x, @world_y = [room_coords[0] * 60 + 5, room_coords[1] * 60 + 5]
+      end
     end
 
     # Camera follow

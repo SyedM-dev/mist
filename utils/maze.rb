@@ -10,6 +10,13 @@ class MazeData
     crate_rooms!
     carve_passages_from(0, 0)
     fix_room_entrances!
+
+    return unless DEBUG
+
+    print_debug
+    $bus.on_retrievable(:boss_room_coords) do
+      next @boss_rooms.first ? [@boss_rooms.first[0] * 2 + 1, @boss_rooms.first[1] * 2 + 1] : nil
+    end
   end
 
   def width
@@ -61,9 +68,36 @@ class MazeData
     true
   end
 
+  def print_debug
+    wall_chars = {
+      0   => " ",  # NONE
+      1   => "╵",  # N
+      2   => "╷",  # S
+      3   => "│",  # NS
+      4   => "╴",  # W
+      5   => "┘",  # NW
+      6   => "┐",  # WS
+      7   => "┤",  # WNS
+      8   => "╶",  # E
+      9   => "└",  # NE
+      10  => "┌",  # ES
+      11  => "├",  # ENS
+      12  => "─",  # EW
+      13  => "┴",  # EWN
+      14  => "┬",  # EWS
+      15  => "┼"   # EWNS
+    }
+    (0...self.height).each do |y|
+      (0...self.width).each do |x|
+        print wall_chars[wall_type(x, y)]
+      end
+      puts
+    end
+  end
+
   private
 
-  BOSS_ROOM_SIZE = 5
+  BOSS_ROOM_SIZE = 3
   BOSS_ROOM = 16
   N, S, W, E = 1, 2, 4, 8
   DX         = { E => 1, W => -1, N =>  0, S => 0 }
@@ -81,8 +115,8 @@ class MazeData
 
   def fix_room_entrances!
     @boss_rooms.each do |x, y|
-      @grid[y][x + 2] |= N
-      @grid[y - 1][x + 2] |= S
+      @grid[y][x + 1] |= N
+      @grid[y - 1][x + 1] |= S
     end
   end
 
@@ -134,29 +168,5 @@ class MazeData
 end
 
 if __FILE__ == $0
-  WALL_CHARS = {
-    0   => " ",  # NONE
-    1   => "╵",  # N
-    2   => "╷",  # S
-    3   => "│",  # NS
-    4   => "╴",  # W
-    5   => "┘",  # NW
-    6   => "┐",  # WS
-    7   => "┤",  # WNS
-    8   => "╶",  # E
-    9   => "└",  # NE
-    10  => "┌",  # ES
-    11  => "├",  # ENS
-    12  => "─",  # EW
-    13  => "┴",  # EWN
-    14  => "┬",  # EWS
-    15  => "┼"   # EWNS
-  }
-  maze = MazeData.new(80, 80)
-  (0...maze.height).each do |y|
-    (0...maze.width).each do |x|
-      print WALL_CHARS[maze.wall_type(x, y)]
-    end
-    puts
-  end
+
 end

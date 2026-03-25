@@ -51,13 +51,14 @@ class Game < Scene
     end
 
     @font.draw_text("FPS: #{@fps}", 5, 5, Float::INFINITY, 1, 1, Gosu::Color::YELLOW)
+    @font.draw_text("Player: [#{@character.world_x.round}, #{@character.world_y.round}]", 5, 30, Float::INFINITY, 1, 1, Gosu::Color::YELLOW)
   end
 
   def draw_fog(camera)
     cam_x, cam_y = camera
     cell = 10
-    i_radius = 80.0
-    o_radius = 360.0
+    i_radius = 90.0
+    o_radius = 400.0
 
     # Player screen position
     px = SCREEN_SIZE[0] / 2.0
@@ -71,20 +72,18 @@ class Game < Scene
         sx = i * cell
         sy = j * cell
 
-        
         dist = Math.sqrt((sx - px)**2 + (sy - py)**2)
-        
+
         if dist < i_radius
           next  # fully clear
         elsif dist > o_radius
           alpha = 255
         else
           t = (dist - i_radius) / (o_radius - i_radius)  # 0..1
-
           world_x = (sx + cam_x) * 0.005
           world_y = (sy + cam_y) * 0.005
-
           # Sample noise at world position so it scrolls with camera
+          # Add time-based offsets for animation
           noise = (@noise[world_x + Gosu.milliseconds / 5000.0, world_y + Gosu.milliseconds / 6000.0] + 1.0) / 2.0
           alpha = (t * (1.0 + noise) * 255).to_i.clamp(0, 255)
         end
