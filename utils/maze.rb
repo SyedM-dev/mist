@@ -1,3 +1,6 @@
+# add 10% wall deletion, ignoring boss rooms
+# add room boss spawn entrance north south east or west middle
+
 class MazeData
   def initialize(width, height, standalone: false)
     @width = width
@@ -11,6 +14,7 @@ class MazeData
     crate_rooms!
     carve_passages_from(0, 0)
     fix_room_entrances!
+    delete_random_walls!
 
     return if standalone
 
@@ -176,8 +180,25 @@ class MazeData
 
   def fix_room_entrances!
     (@boss_rooms + [@start_room]).each do |x, y|
-      @grid[y][x + 1] |= N
-      @grid[y - 1][x + 1] |= S
+      dir = [N, S, E, W].sample
+      cx = x + BOSS_ROOM_SIZE / 2
+      cy = y + BOSS_ROOM_SIZE / 2
+      case dir
+      when N
+        @grid[y][cx] |= N
+        @grid[y - 1][cx] |= S
+      when S
+        by = y + BOSS_ROOM_SIZE - 1
+        @grid[by][cx] |= S
+        @grid[by + 1][cx] |= N
+      when W
+        @grid[cy][x] |= W
+        @grid[cy][x - 1] |= E
+      when E
+        bx = x + BOSS_ROOM_SIZE - 1
+        @grid[cy][bx] |= E
+        @grid[cy][bx + 1] |= W
+      end
     end
   end
 
@@ -227,6 +248,31 @@ class MazeData
         @grid[cy][cx] |= direction
         @grid[ny][nx] |= OPPOSITE[direction]
         carve_passages_from(nx, ny)
+      end
+    end
+  end
+
+  def delete_random_walls!
+    (0...@height).each do |y|
+      (0...@width).each do |x|
+        next if rand > 0.05 # 5% chance to delete a wall
+
+        # skip boss rooms
+        next if (@grid[y][x] & BOSS_ROOM) != 0
+
+        # pick random direction
+        dir = [N, S, E, W].sample
+        nx, ny = x + DX[dir], y + DY[dir]
+
+        # bounds check
+        next unless ny.between?(0, @height - 1) && nx.between?(0, @width - 1)
+
+        # skip if neighbor is boss room
+        next if (@grid[ny][nx] & BOSS_ROOM) != 0
+
+        # remove wall both sides
+        @grid[y][x] |= dir
+        @grid[ny][nx] |= OPPOSITE[dir]
       end
     end
   end
