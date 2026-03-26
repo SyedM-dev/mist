@@ -131,33 +131,8 @@ class EnemyAI
     dx = Gosu.offset_x(angle, SPEED)
     dy = Gosu.offset_y(angle, SPEED)
 
-    steps = SPEED.ceil
-    step_dx = dx / steps.to_f
-    step_dy = dy / steps.to_f
-
-    steps.times do
-      moved_x = false
-      moved_y = false
-
-      # Try X
-      @enemy.x += step_dx
-      if ($bus.get(:collides?, @enemy.rect) & [:wall, :object])&.any?
-        @enemy.x -= step_dx
-      else
-        moved_x = true
-      end
-
-      # Try Y (independent — keeps full intent)
-      @enemy.y += step_dy
-      if ($bus.get(:collides?, @enemy.rect) & [:wall, :object])&.any?
-        @enemy.y -= step_dy
-      else
-        moved_y = true
-      end
-
-      # If both failed, stop early
-      break unless moved_x || moved_y
-    end
+    @enemy.x += dx
+    @enemy.y += dy
 
     if $bus.get(:collides?, @enemy.rect)&.include?(:character)
       # Attack player

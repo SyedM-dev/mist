@@ -129,7 +129,7 @@ class Character
 
     elapsed = Gosu.milliseconds / 1000.0
     frame_index = ((elapsed * 7).floor) % 6
-    @animations[@current_animation][frame_index].draw(sprite_x, sprite_y, sprite_y, 1.8, 1.8)
+    @animations[@current_animation][frame_index].draw(sprite_x, sprite_y, sprite_y + 30, 1.8, 1.8)
 
     return unless DEBUG
 
