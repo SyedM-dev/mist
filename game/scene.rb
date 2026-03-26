@@ -1,5 +1,6 @@
 require_relative 'state'
 require_relative 'maze'
+require_relative 'hud'
 require_relative 'placeables/base'
 require_relative 'enemy/handler'
 require_relative 'character'
@@ -17,6 +18,8 @@ class Game < Scene
     @character = Character.new
     @enemies = EnemyHandler.new
     @objects = ObjectHandler.new
+
+    @hud = HUD.new
 
     @camera = [0, 0]
 
@@ -44,6 +47,7 @@ class Game < Scene
     @character.draw
     @enemies.draw
     @objects.draw
+    @hud.draw
     draw_fog!
     draw_debug! if DEBUG
   end
