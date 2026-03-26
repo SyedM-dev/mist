@@ -1,6 +1,3 @@
-# add 10% wall deletion, ignoring boss rooms
-# add room boss spawn entrance north south east or west middle
-
 class MazeData
   def initialize(width, height, standalone: false)
     @width = width
