@@ -88,10 +88,35 @@ class ObjectHandler
   def initialize
     start_room_coords = $bus.get(:start_room_coords)
     @objects = []
+
+    #spawn_chests!
   end
 
   def spawn_chests!
     world_size = $bus.get(:maze_size) || [0, 0]
+
+    cell_size = 6  # tweak this (bigger = more spread out)
+
+    (0...world_size[0]).step(cell_size) do |cx|
+      (0...world_size[1]).step(cell_size) do |cy|
+
+        # Random position inside this cell
+        x = cx + rand(cell_size)
+        y = cy + rand(cell_size)
+
+        next if x >= world_size[0] || y >= world_size[1]
+
+        # Keep your spawn exclusion
+        next if (x - 2).abs <= 1 && (y - 2).abs <= 1
+
+        next if $bus.get(:room?, x, y)
+
+        # Chance per cell instead of per tile
+        if rand < 0.6
+          @objects << Chest.new(x, y)
+        end
+      end
+    end
   end
 
   def add(object)

@@ -19,6 +19,13 @@ class MazeData
       next @start_room ? [@start_room[0] * 2 + 1, @start_room[1] * 2 + 1] : nil
     end
 
+    $bus.on(:room?) do |gx, gy|
+      ([@start_room] + @boss_rooms).any? do |rx, ry|
+        gx.between?(rx, rx + BOSS_ROOM_SIZE) &&
+        gy.between?(ry, ry + BOSS_ROOM_SIZE)
+      end
+    end
+
     return unless DEBUG
 
     print_debug
@@ -26,7 +33,7 @@ class MazeData
       next @boss_rooms.first ? [@boss_rooms.first[0] * 2 + 1, @boss_rooms.first[1] * 2 + 1] : nil
     end
   end
-
+ 
   def solve(x1, y1, x2, y2)
     # explain why dijkstra's is fine here: 
       # A* hueristics make it possible to chose a longer path through rooms instead of a shorter path through corridors, which is not what we want for enemy pathfinding
