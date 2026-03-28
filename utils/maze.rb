@@ -160,7 +160,7 @@ class MazeData
       (0...self.width).each do |x|
         print wall_chars[wall_type(x, y)]
       end
-      puts
+      print "\n"
     end
   end
 

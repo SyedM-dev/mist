@@ -1,6 +1,5 @@
-require_relative 'state'
 require_relative 'maze'
-require_relative 'hud'
+require_relative 'hud/layer'
 require_relative 'props/handler'
 require_relative 'enemy/handler'
 require_relative 'character'
@@ -19,7 +18,7 @@ class Game < Scene
     @enemies = EnemyHandler.new
     @props = PropsHandler.new
 
-    @hud = HUD.new
+    @hud = HUDLayer.new
 
     @camera = [0, 0]
 
@@ -152,5 +151,7 @@ class Game < Scene
 
   def button_down(id, pos)
     return $bus.emit(:change_scene, Menu.new) if id == Gosu::KB_ESCAPE
+
+    @hud.button_down(id, pos)
   end
 end

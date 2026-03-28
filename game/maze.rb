@@ -4,7 +4,6 @@ class Maze
   def initialize
     @maze = MazeData.new(80, 80)
     @spritesheet = Gosu::Image.load_tiles("assets/images/walls.png", 20, 40, retro: true)
-    puts @spritesheet.size
 
     $bus.on(:maze_size) { [80, 80] }
 
