@@ -44,20 +44,7 @@ class Game < Scene
   end
 
   def draw_debug!
-    now = Gosu.milliseconds
-    @last_draw_time ||= now
-    @draw_count ||= 0
-    @fps ||= 0
-
-    @draw_count += 1
-
-    if now - @last_draw_time >= 1000
-      @fps = @draw_count
-      @draw_count = 0
-      @last_draw_time = now
-    end
-
-    @font.draw_text("FPS: #{@fps}", 5, 5, Float::INFINITY, 1, 1, Gosu::Color::YELLOW)
+    @font.draw_text("FPS: #{Gosu.fps}", 5, 5, Float::INFINITY, 1, 1, Gosu::Color::YELLOW)
     world_x, world_y = $bus.get(:player_position)&.map(&:round) || [0, 0]
     @font.draw_text("Player: [#{world_x}, #{world_y}]", 5, 30, Float::INFINITY, 1, 1, Gosu::Color::YELLOW)
   end
@@ -79,8 +66,10 @@ class Game < Scene
     px = SCREEN_SIZE[0] / 2.0
     py = SCREEN_SIZE[1] / 2.0
 
-    # Collect all light sources (player + torches)
-    torches = $bus.get_all(:torch_position)
+    # Collect torch positions relative to camera
+    torches = $bus.get(:nearby_torches,
+      [cam_x - SCREEN_SIZE[0] / 2, cam_y - SCREEN_SIZE[1] / 2, SCREEN_SIZE[0] * 2, SCREEN_SIZE[1] * 2]
+    ) || []
     torch_lights = torches.map { |t| [t[0] - cam_x, t[1] - cam_y] }
 
     tiles_x = (SCREEN_SIZE[0] / cell) + 2

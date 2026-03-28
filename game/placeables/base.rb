@@ -12,14 +12,6 @@ class Placeable
     @y = y
     @frames_count = 0
     @spritesheet = nil
-
-    $bus.on(:object_at) do |x, y|
-      next @x == x && @y == y ? self : nil
-    end
-
-    $bus.on(:collides?) do |rect|
-      next collides?(rect) ? :object : nil
-    end
   end
 
   def collides?(rect)
@@ -28,7 +20,7 @@ class Placeable
   end
 
   def rect
-    [@x * 120 + 90 - SIZE[0] / 2, @y * 120 + 90 - SIZE[1], SIZE[0], SIZE[1]]
+    [@x * 120 + 90 - SIZE[0] / 2, @y * 120 + 90 - SIZE[1], *SIZE]
   end
 
   def update
@@ -50,7 +42,7 @@ class Placeable
     return unless DEBUG
 
     # collision box centered on same point
-    Gosu.draw_rect(screen_x - SIZE[0] / 2, screen_y - SIZE[1], SIZE[0], SIZE[1], Gosu::Color.new(0x88ff0000), Float::INFINITY)
+    Gosu.draw_rect(screen_x - SIZE[0] / 2, screen_y - SIZE[1], *SIZE, Gosu::Color.new(0x88ff0000), Float::INFINITY)
   end
 end
 
@@ -67,16 +59,15 @@ class Torch < Placeable
     super(x, y)
     @frames_count = 4
     @spritesheet = Gosu::Image.load_tiles("assets/images/torch.png", 20, 20, retro: true)
-
-    $bus.on(:torch_position) do
-      next rect
-    end
   end
 end
 
 class Chest < Placeable
   def initialize(x, y)
     super(x, y)
+    @wood = rand(0..64)
+    @metal = rand(0..16)
+    @science = rand(0..4)
     @frames_count = 1
     @spritesheet = Gosu::Image.load_tiles("assets/images/chest.png", 20, 20, retro: true)
   end
@@ -86,16 +77,28 @@ class ObjectHandler
   attr_reader :objects
 
   def initialize
-    start_room_coords = $bus.get(:start_room_coords)
     @objects = []
+    @grid = {}
 
-    #spawn_chests!
+    spawn_chests!
+
+    $bus.on(:collides?) do |rect|
+      nearby_objects(rect).any? { |obj| obj.collides?(rect) } ? :object : nil
+    end
+
+    $bus.on(:object_at) do |x, y|
+      @grid[[x, y]]
+    end
+
+    $bus.on(:nearby_torches) do |rect|
+      nearby_objects(rect).select { |obj| obj.is_a?(Torch) }.map { |t| t.rect }
+    end
   end
 
   def spawn_chests!
     world_size = $bus.get(:maze_size) || [0, 0]
 
-    cell_size = 6  # tweak this (bigger = more spread out)
+    cell_size = 10
 
     (0...world_size[0]).step(cell_size) do |cx|
       (0...world_size[1]).step(cell_size) do |cy|
@@ -111,16 +114,38 @@ class ObjectHandler
 
         next if $bus.get(:room?, x, y)
 
-        # Chance per cell instead of per tile
-        if rand < 0.6
-          @objects << Chest.new(x, y)
-        end
+        chest = Chest.new(x, y)
+        @objects << chest
+        @grid[[x, y]] = chest
       end
     end
   end
 
+  def nearby_objects(rect)
+    x, y, w, h = rect
+
+    min_tx = ((x) / 120).floor
+    max_tx = ((x + w) / 120).floor
+    min_ty = ((y) / 120).floor
+    max_ty = ((y + h) / 120).floor
+
+    results = []
+
+    (min_tx..max_tx).each do |tx|
+      (min_ty..max_ty).each do |ty|
+        obj = @grid[[tx, ty]]
+        results << obj if obj
+      end
+    end
+
+    results
+  end
+
   def add(object)
     @objects << object
+
+    key = [object.x, object.y]
+    @grid[key] = object
   end
 
   def update
@@ -128,6 +153,7 @@ class ObjectHandler
   end
 
   def draw
-    @objects.each(&:draw)
+    cam = $bus.get(:camera_pos) || [0, 0]
+    nearby_objects([*cam, *SCREEN_SIZE]).each(&:draw)
   end
 end
