@@ -1,4 +1,6 @@
-require_relative "base"
+require_relative "radar"
+require_relative "torch"
+require_relative "chest"
 
 class PropsHandler
   attr_reader :props
@@ -25,7 +27,7 @@ class PropsHandler
   def spawn_chests!
     world_size = $bus.get(:maze_size) || [0, 0]
 
-    cell_size = 10
+    cell_size = 8
 
     (0...world_size[0]).step(cell_size) do |cx|
       (0...world_size[1]).step(cell_size) do |cy|
@@ -46,6 +48,18 @@ class PropsHandler
         @grid[[x, y]] = chest
       end
     end
+
+    # Add one in the start room for players to have something to interact with right away
+    start_room_x, start_room_y = $bus.get(:start_room_coords) || [0, 0]
+    x, y = [
+      [start_room_x, start_room_y],
+      [start_room_x + 2, start_room_y],
+      [start_room_x, start_room_y + 2],
+      [start_room_x + 2, start_room_y + 2]
+    ].sample
+    chest = Chest.new(x, y)
+    @props << chest
+    @grid[[x, y]] = chest
   end
 
   def nearby_props(rect)
@@ -75,8 +89,14 @@ class PropsHandler
     @grid[key] = prop
   end
 
-  def update
-    @props.each(&:update)
+  def update(dt)
+    cam = $bus.get(:camera_pos) || [0, 0]
+    nearby_props([*cam, *SCREEN_SIZE]).each do |prop|
+      if prop.update(dt)
+        @props.delete(prop)
+        @grid.delete([prop.x, prop.y])
+      end
+    end
   end
 
   def draw

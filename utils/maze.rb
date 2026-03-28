@@ -16,7 +16,7 @@ class MazeData
     return if standalone
 
     $bus.on(:start_room_coords) do
-      next @start_room ? [@start_room[0] * 2 + 1, @start_room[1] * 2 + 1] : nil
+      next @start_room
     end
 
     $bus.on(:room?) do |gx, gy|

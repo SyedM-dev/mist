@@ -139,7 +139,7 @@ class Game < Scene
       (0...tiles_x).each do |i|
         sx = i * tile_size - offset_x
         sy = j * tile_size - offset_y
-        @floor_image.draw(sx, sy, -1000, 3, 3)
+        @floor_image.draw(sx, sy, -Float::INFINITY, 3, 3)
       end
     end
   end
@@ -147,10 +147,10 @@ class Game < Scene
   def update(dt)
     @character.update(dt)
     @enemies.update(dt)
-    @props.update
+    @props.update(dt)
   end
 
-  def button_down(id, _pos)
+  def button_down(id, pos)
     return $bus.emit(:change_scene, Menu.new) if id == Gosu::KB_ESCAPE
   end
 end

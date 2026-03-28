@@ -34,5 +34,9 @@ class State
     @health = 100
     @stealth = 100
     @memory = 256
+
+    $bus.on(:obtain) do |type, amount|
+      @inventory[type] += amount if @inventory.key?(type)
+    end
   end
 end

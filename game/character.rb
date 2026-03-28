@@ -10,7 +10,7 @@ class Character
 
     start_room_coords = $bus.get(:start_room_coords)
     if start_room_coords
-      @world_x, @world_y = [(start_room_coords[0] + 2) * 60 + 30, (start_room_coords[1] + 2) * 60 + 30]
+      @world_x, @world_y = [(start_room_coords[0] * 2 + 3) * 60 + 30, (start_room_coords[1] * 2 + 3) * 60 + 30]
     end
 
     # Load the full sheet as tiles

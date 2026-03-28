@@ -1,4 +1,5 @@
 class Prop
+  DESTRUCTION_SPEED = 50.0
   SIZE = [25, 15]
 
   # The base class for all props in the game. Props are things that can be interacted with, but do not move (unlike characters).
@@ -12,19 +13,50 @@ class Prop
     @y = y
     @frames_count = 0
     @spritesheet = nil
+    @health = 100
   end
 
   def collides?(rect)
-    return true if intersects?(self.rect, rect)
+    return true if intersects?(self.collision_rect, rect)
     false
   end
 
-  def rect
+  def collision_rect
     [@x * 120 + 90 - SIZE[0] / 2, @y * 120 + 90 - SIZE[1], *SIZE]
   end
 
-  def update
-    # For now, placeables don't have any behavior
+  def rect
+    [@x * 120 + 90 - 20, @y * 120 + 90 - 20, 40, 40]
+  end
+
+  def resources
+    {}
+  end
+
+  def update(dt)
+    return unless Gosu.button_down?(Gosu::MS_LEFT)
+    
+    player_x, player_y = $bus.get(:player_position) || [0, 0]
+
+    tile_x, tile_y = [(player_x - 90) / 120, (player_y - 90) / 120].map(&:round)
+
+    return unless tile_x == @x && tile_y == @y
+
+    mouse_x, mouse_y = $bus.get(:mouse_pos)
+    cam_x, cam_y = $bus.get(:camera_pos)
+    world_mouse_x = mouse_x + cam_x
+    world_mouse_y = mouse_y + cam_y
+
+    return unless intersects?([world_mouse_x, world_mouse_y, 1, 1], self.rect)
+
+    @health -= DESTRUCTION_SPEED * dt
+    if @health <= 0
+      resources.each do |type, amount|
+        $bus.emit(:obtain, type, amount)
+      end
+      return true
+    end
+    false
   end
 
   def draw
@@ -39,36 +71,22 @@ class Prop
 
     @spritesheet[frame_index].draw(screen_x - 20, screen_y - 20, screen_y, 2, 2)
 
+    if @health < 100
+      percent = 1.0 - @health / 100.0
+      w, h = SIZE
+
+      bar_width = w * percent
+      bar_height = 3
+
+      bar_x = screen_x - w / 2
+      bar_y = screen_y + h + 5
+
+      Gosu.draw_rect(bar_x, bar_y, bar_width, bar_height, Gosu::Color::RED, screen_y + 1)
+    end
+
     return unless DEBUG
 
     # collision box centered on same point
     Gosu.draw_rect(screen_x - SIZE[0] / 2, screen_y - SIZE[1], *SIZE, Gosu::Color.new(0x88ff0000), Float::INFINITY)
-  end
-end
-
-class Radar < Prop
-  def initialize(x, y)
-    super(x, y)
-    @frames_count = 4
-    @spritesheet = Gosu::Image.load_tiles("assets/images/radar.png", 20, 20, retro: true)
-  end
-end
-
-class Torch < Prop
-  def initialize(x, y)
-    super(x, y)
-    @frames_count = 4
-    @spritesheet = Gosu::Image.load_tiles("assets/images/torch.png", 20, 20, retro: true)
-  end
-end
-
-class Chest < Prop
-  def initialize(x, y)
-    super(x, y)
-    @wood = rand(0..64)
-    @metal = rand(0..16)
-    @science = rand(0..4)
-    @frames_count = 1
-    @spritesheet = Gosu::Image.load_tiles("assets/images/chest.png", 20, 20, retro: true)
   end
 end
