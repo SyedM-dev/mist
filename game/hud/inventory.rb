@@ -113,24 +113,30 @@ class Inventory
 
     recipe = CRAFT_RECIPES[type]
 
-    # How many we can craft
-    possible_counts = recipe.map { |res, req| grid_value(res) / req }
-    max_possible = possible_counts.min
-    return if max_possible == 0
+    # How many we can craft based on resources
+    resource_max = recipe.map { |res, req| grid_value(res) / req }.min
+    return if resource_max == 0
 
-    craft_amount = ctrl ? max_possible : 1
+    # How many we can fit in inventory slot
+    row, col = find_slot(type)
+    return unless row  # sanity check
+
+    slot_amount, slot_max = @grid[row][col][1]
+    fit_max = slot_max - slot_amount
+    return if fit_max == 0  # can't fit anything
+
+    # Determine craft amount (1 or as many as possible)
+    craft_amount = ctrl ? [resource_max, fit_max].min : 1
+    return if craft_amount == 0  # nothing to craft
 
     # Subtract resources
     recipe.each do |res, req|
-      row, col = find_slot(res)
-      @grid[row][col][1][0] -= req * craft_amount
+      r, c = find_slot(res)
+      @grid[r][c][1][0] -= req * craft_amount
     end
 
-    # Add crafted item
-    row, col = find_slot(type)
+    # Add crafted items
     @grid[row][col][1][0] += craft_amount
-    # Clamp to max
-    @grid[row][col][1][0] = @grid[row][col][1][1] if @grid[row][col][1][0] > @grid[row][col][1][1]
   end
 
   # Helper to get amount of resource
