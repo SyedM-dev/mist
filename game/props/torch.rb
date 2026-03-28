@@ -1,11 +1,7 @@
 require_relative "base"
 
 class Torch < Prop
-  def initialize(x, y)
-    super(x, y)
-    @frames_count = 4
-    @spritesheet = Gosu::Image.load_tiles("assets/images/torch.png", 20, 20, retro: true)
-  end
+  setup_sprites("assets/images/torch.png", 4)
 
   def resources
     { wood: rand(0..8) }

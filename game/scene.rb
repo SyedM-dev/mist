@@ -61,11 +61,15 @@ class Game < Scene
     py = SCREEN_SIZE[1] / 2.0
     
     # Collect torch positions relative to camera
-    torches = $bus.get(:nearby_torches,
-    [cam_x - SCREEN_SIZE[0] / 2, cam_y - SCREEN_SIZE[1] / 2, SCREEN_SIZE[0] * 2, SCREEN_SIZE[1] * 2]
-    ) || []
-    torch_lights = torches.map { |t| [t[0] - cam_x, t[1] - cam_y] }
-    
+    torch_lights = []
+    # Only calculate torch lights if the setting is enabled, to save performance
+    if $bus.get(:settings, :torches_lightup)
+      torches = $bus.get(:nearby_torches,
+      [cam_x - SCREEN_SIZE[0] / 2, cam_y - SCREEN_SIZE[1] / 2, SCREEN_SIZE[0] * 2, SCREEN_SIZE[1] * 2]
+      ) || []
+      torch_lights = torches.map { |t| [t[0] - cam_x, t[1] - cam_y] }
+    end
+
     tiles_x = (SCREEN_SIZE[0] / cell) + 2
     tiles_y = (SCREEN_SIZE[1] / cell) + 2
 
@@ -152,6 +156,7 @@ class Game < Scene
   def button_down(id, pos)
     return $bus.emit(:change_scene, Menu.new) if id == Gosu::KB_ESCAPE
 
-    @hud.button_down(id, pos)
+    return if @hud.button_down(id, pos)
+    return if @props.button_down(id, pos)
   end
 end

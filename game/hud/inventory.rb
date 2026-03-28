@@ -3,6 +3,7 @@ class Inventory
   COLS = 3
   ROW_HEIGHT = 48
   COL_WIDTH = 40
+  RECT = [22, 30, 126, 196]
 
   CRAFT_RECIPES = {
     lorentz_field: { wood: 16, metal: 8, science: 2 },
@@ -39,6 +40,24 @@ class Inventory
       @grid[row][col][1][0] += amount
       @grid[row][col][1][0] = @grid[row][col][1][1] if @grid[row][col][1][0] > @grid[row][col][1][1]
     end
+
+    $bus.on(:consume) do |type, amount|
+      row, col = find_slot(type)
+      next false unless row
+      next false if @grid[row][col][1][0] < amount
+      @grid[row][col][1][0] -= amount
+      next true
+    end
+
+    $bus.on(:count) do |type|
+      row, col = find_slot(type)
+      next 0 unless row
+      next @grid[row][col][1][0]
+    end
+
+    $bus.on(:selected_item) do
+      @inventory_selected
+    end
   end
 
   # Draw the inventory
@@ -71,27 +90,40 @@ class Inventory
   def button_down(id, pos)
     case id
     when Gosu::MS_LEFT, Gosu::MS_RIGHT
-      mouse_click(*pos, id)
+      return mouse_click(*pos, id)
     when Gosu::KB_1 then @inventory_selected = :occams_razor
     when Gosu::KB_2 then @inventory_selected = :quantum_bow
     when Gosu::KB_3 then @inventory_selected = :blade_of_recursion
-    when Gosu::KB_C
+    when Gosu::KB_DOWN
       row, col = find_slot(@inventory_selected)
       @inventory_selected = @grid[(row + 1) % @grid.size][col][0]
-    when Gosu::KB_V
+    when Gosu::KB_UP
+      row, col = find_slot(@inventory_selected)
+      @inventory_selected = @grid[(row - 1) % @grid.size][col][0]
+    when Gosu::KB_LEFT
+      row, col = find_slot(@inventory_selected)
+      @inventory_selected = @grid[row][(col - 1) % @grid[row].size][0]
+    when Gosu::KB_RIGHT
       row, col = find_slot(@inventory_selected)
       @inventory_selected = @grid[row][(col + 1) % @grid[row].size][0]
+    when Gosu::KB_RETURN
+      craft(@inventory_selected, ctrl: Gosu.button_down?(Gosu::KB_RIGHT_CONTROL) || Gosu.button_down?(Gosu::KB_LEFT_CONTROL))
+    else
+      return false
     end
+    true
   end
 
   # Mouse click detection
   def mouse_click(mx, my, id)
+    return false unless intersects?([mx, my, 1, 1], RECT)
+
     x_start, y_start = OFFSET
     row_idx = ((my - y_start) / ROW_HEIGHT).floor
     col_idx = ((mx - x_start) / COL_WIDTH).floor
 
-    return if row_idx < 0 || row_idx >= @grid.size
-    return if col_idx < 0 || col_idx >= @grid[row_idx].size
+    return true if row_idx < 0 || row_idx >= @grid.size
+    return true if col_idx < 0 || col_idx >= @grid[row_idx].size
 
     type, (amount, max) = @grid[row_idx][col_idx]
 
@@ -104,6 +136,8 @@ class Inventory
         craft(type, ctrl: Gosu.button_down?(Gosu::KB_RIGHT_CONTROL) || Gosu.button_down?(Gosu::KB_LEFT_CONTROL))
       end
     end
+
+    true
   end
 
   private
