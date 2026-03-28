@@ -87,11 +87,11 @@ class ObjectHandler
 
   def initialize
     start_room_coords = $bus.get(:start_room_coords)
-    @objects = [
-      Torch.new(start_room_coords[0] / 2 - 1, start_room_coords[1] / 2 - 1),
-      Torch.new(start_room_coords[0] / 2 + 3, start_room_coords[1] / 2),
-      Torch.new(start_room_coords[0] / 2, start_room_coords[1] / 2 - 1),
-    ]
+    @objects = []
+  end
+
+  def spawn_chests!
+    world_size = $bus.get(:maze_size) || [0, 0]
   end
 
   def add(object)

@@ -6,6 +6,8 @@ class Maze
     @spritesheet = Gosu::Image.load_tiles("assets/images/walls.png", 20, 40, retro: true)
     puts @spritesheet.size
 
+    $bus.on(:maze_size) { [80, 80] }
+
     $bus.on(:maze_solve) do |x1, y1, x2, y2|
       next @maze.solve(x1, y1, x2, y2)
     end
