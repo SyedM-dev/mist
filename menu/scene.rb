@@ -13,7 +13,7 @@ class Menu < Scene
     @last_mouse_pos = nil
   end
 
-  def update
+  def update(_dt)
     pos = $bus.get(:mouse_pos)
     return unless pos
 

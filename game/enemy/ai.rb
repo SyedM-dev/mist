@@ -1,6 +1,6 @@
 class EnemyAI
   AGGRO_RADIUS = 2000
-  SPEED = 2
+  SPEED = 120.0
   CORNER_OFFSET = 35 # how far from tile center to place corner waypoint
 
   def initialize(enemy, type)
@@ -12,7 +12,7 @@ class EnemyAI
     @avoiding_obstacle = false
   end
 
-  def update(player_x, player_y)
+  def update(player_x, player_y, dt)
     distance = Gosu.distance(@enemy.x, @enemy.y, player_x, player_y)
     return unless distance < AGGRO_RADIUS
 
@@ -21,14 +21,14 @@ class EnemyAI
 
     return if $bus.get_all(:collides?, @enemy.rect)&.include?(:character)
 
-    object_in_tile = $bus.get(:object_at, enemy_tile[0], enemy_tile[1])
+    prop_in_tile = $bus.get(:prop_at, enemy_tile[0], enemy_tile[1])
 
     if player_tile == enemy_tile
-      los_blocked = !object_in_tile.nil? && !(
-        line_of_sight?(@enemy.x - @enemy.w / 2, @enemy.y - @enemy.h / 2, player_x, player_y, object_in_tile.rect) &&
-        line_of_sight?(@enemy.x + @enemy.w / 2, @enemy.y + @enemy.h / 2, player_x, player_y, object_in_tile.rect) &&
-        line_of_sight?(@enemy.x - @enemy.w / 2, @enemy.y + @enemy.h / 2, player_x, player_y, object_in_tile.rect) &&
-        line_of_sight?(@enemy.x + @enemy.w / 2, @enemy.y - @enemy.h / 2, player_x, player_y, object_in_tile.rect)
+      los_blocked = !prop_in_tile.nil? && !(
+        line_of_sight?(@enemy.x - @enemy.w / 2, @enemy.y - @enemy.h / 2, player_x, player_y, prop_in_tile.rect) &&
+        line_of_sight?(@enemy.x + @enemy.w / 2, @enemy.y + @enemy.h / 2, player_x, player_y, prop_in_tile.rect) &&
+        line_of_sight?(@enemy.x - @enemy.w / 2, @enemy.y + @enemy.h / 2, player_x, player_y, prop_in_tile.rect) &&
+        line_of_sight?(@enemy.x + @enemy.w / 2, @enemy.y - @enemy.h / 2, player_x, player_y, prop_in_tile.rect)
       )
 
       if los_blocked
@@ -48,7 +48,7 @@ class EnemyAI
           @avoiding_obstacle = true
         end
       else
-        move_towards(player_x, player_y)
+        move_towards(player_x, player_y, dt)
         return
       end
     end
@@ -56,7 +56,7 @@ class EnemyAI
     if @waypoints.empty? || @last_player_tile != player_tile
       @last_player_tile = player_tile
       @tile_path = $bus.get(:maze_solve, enemy_tile[0], enemy_tile[1], player_tile[0], player_tile[1]) || []
-      if $bus.get(:object_at, enemy_tile[0], enemy_tile[1]).nil?
+      if $bus.get(:prop_at, enemy_tile[0], enemy_tile[1]).nil?
         @tile_path.shift
       end
       @waypoints = build_waypoints(@tile_path)
@@ -72,7 +72,7 @@ class EnemyAI
       return
     end
 
-    move_towards(target_x, target_y)
+    move_towards(target_x, target_y, dt)
   end
 
   def draw
@@ -92,7 +92,7 @@ class EnemyAI
       center_x = tx * 120 + 90
       center_y = ty * 120 + 90
 
-      unless $bus.get(:object_at, tx, ty).nil?
+      unless $bus.get(:prop_at, tx, ty).nil?
         next_tile = tile_path[i + 1]
         prev_tile = i > 0 ? tile_path[i - 1] : nil
 
@@ -126,10 +126,10 @@ class EnemyAI
     waypoints
   end
 
-  def move_towards(target_x, target_y)
+  def move_towards(target_x, target_y, dt)
     angle = Gosu.angle(@enemy.x, @enemy.y, target_x, target_y)
-    dx = Gosu.offset_x(angle, SPEED)
-    dy = Gosu.offset_y(angle, SPEED)
+    dx = Gosu.offset_x(angle, SPEED * dt)
+    dy = Gosu.offset_y(angle, SPEED * dt)
 
     @enemy.x += dx
     @enemy.y += dy

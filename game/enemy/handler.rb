@@ -5,9 +5,9 @@ class EnemyHandler
     @enemies = []
   end
 
-  def update
+  def update(dt)
     spawn!
-    @enemies.each(&:update)
+    @enemies.each { |enemy| enemy.update(dt) }
   end
 
   def spawn!

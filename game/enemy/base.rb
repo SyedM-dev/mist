@@ -25,9 +25,9 @@ class Enemy
     false
   end
 
-  def update
+  def update(dt)
     player_pos = $bus.get(:player_position)
-    @ai.update(*player_pos) if player_pos
+    @ai.update(*player_pos, dt) if player_pos
   end
 
   def draw

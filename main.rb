@@ -17,6 +17,7 @@ class Window < Gosu::Window
     self.caption = "Mist"
 
     @scene = Menu.new
+    @last_time = Gosu.milliseconds
 
     $bus.on(:quit_game) { close! }
 
@@ -35,7 +36,11 @@ class Window < Gosu::Window
   end
 
   def update
-    @scene.update
+    now = Gosu.milliseconds
+    dt = (now - @last_time) / 1000.0
+    @last_time = now
+
+    @scene.update(dt)
   end
 
   def compute_transform

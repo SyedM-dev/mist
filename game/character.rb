@@ -1,7 +1,7 @@
 class Character
   attr_reader :world_x, :world_y
 
-  SPEED = 3
+  SPEED = 180.0
   SIZE = [25, 30]
 
   def initialize
@@ -56,7 +56,7 @@ class Character
     false
   end
 
-  def update
+  def update(dt)
     dx = 0.0
     dy = 0.0
 
@@ -89,23 +89,26 @@ class Character
     end
 
     # Apply speed
-    dx *= SPEED
-    dy *= SPEED
+    dx *= SPEED * dt
+    dy *= SPEED * dt
 
-    steps = SPEED.ceil
-    step_dx = dx / steps.to_f
-    step_dy = dy / steps.to_f
+    distance = Math.sqrt(dx * dx + dy * dy)
+    steps = (distance / 3.0).ceil
+    steps = 1 if steps < 1
+
+    step_dx = dx / steps
+    step_dy = dy / steps
 
     steps.times do
       # X axis
       @world_x += step_dx
-      if ($bus.get_all(:collides?, rect) & [:wall, :object])&.any?
+      if ($bus.get_all(:collides?, rect) & [:wall, :prop])&.any?
         @world_x -= step_dx
       end
 
       # Y axis
       @world_y += step_dy
-      if ($bus.get_all(:collides?, rect) & [:wall, :object])&.any?
+      if ($bus.get_all(:collides?, rect) & [:wall, :prop])&.any?
         @world_y -= step_dy
       end
     end

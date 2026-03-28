@@ -1,7 +1,7 @@
 require_relative 'state'
 require_relative 'maze'
 require_relative 'hud'
-require_relative 'placeables/base'
+require_relative 'props/handler'
 require_relative 'enemy/handler'
 require_relative 'character'
 
@@ -17,7 +17,7 @@ class Game < Scene
     @maze = Maze.new
     @character = Character.new
     @enemies = EnemyHandler.new
-    @objects = ObjectHandler.new
+    @props = PropsHandler.new
 
     @hud = HUD.new
 
@@ -37,7 +37,7 @@ class Game < Scene
     @maze.draw
     @character.draw
     @enemies.draw
-    @objects.draw
+    @props.draw
     @hud.draw
     draw_fog!
     draw_debug! if DEBUG
@@ -50,11 +50,6 @@ class Game < Scene
   end
 
   def draw_fog!
-    # This part is a shader but due to time constraints, I'm doing it on the CPU.
-    # If done on the GPU, we could do a single pass and have much better performance.
-    # and also make it more fine-grained and smoother gradients.
-    # doing it on the GPU would require better knowledge of the ruby openGL bindings and shader programming, which I don't have right now. 
-
     cam_x, cam_y = @camera
     cell = 10
     p_i_radius = 80.0
@@ -65,16 +60,22 @@ class Game < Scene
     # Player screen position
     px = SCREEN_SIZE[0] / 2.0
     py = SCREEN_SIZE[1] / 2.0
-
+    
     # Collect torch positions relative to camera
     torches = $bus.get(:nearby_torches,
-      [cam_x - SCREEN_SIZE[0] / 2, cam_y - SCREEN_SIZE[1] / 2, SCREEN_SIZE[0] * 2, SCREEN_SIZE[1] * 2]
+    [cam_x - SCREEN_SIZE[0] / 2, cam_y - SCREEN_SIZE[1] / 2, SCREEN_SIZE[0] * 2, SCREEN_SIZE[1] * 2]
     ) || []
     torch_lights = torches.map { |t| [t[0] - cam_x, t[1] - cam_y] }
-
+    
     tiles_x = (SCREEN_SIZE[0] / cell) + 2
     tiles_y = (SCREEN_SIZE[1] / cell) + 2
 
+    # This part is a shader but due to time constraints, I'm doing it on the CPU.
+    # If done on the GPU, we could have much better performance.
+    # and also make it more fine-grained and smoother gradients.
+    # doing it on the GPU would require better knowledge of the ruby openGL bindings and shader programming,
+    # which I don't have right now. 
+    
     tiles_y.times do |j|
       tiles_x.times do |i|
         sx = i * cell
@@ -143,10 +144,10 @@ class Game < Scene
     end
   end
 
-  def update
-    @character.update
-    @enemies.update
-    @objects.update
+  def update(dt)
+    @character.update(dt)
+    @enemies.update(dt)
+    @props.update
   end
 
   def button_down(id, _pos)

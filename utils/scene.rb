@@ -4,7 +4,7 @@ class Scene
   def initialize
   end
 
-  def update
+  def update(_dt)
   end
 
   def draw
