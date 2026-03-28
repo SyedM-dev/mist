@@ -63,6 +63,11 @@ class Game < Scene
   end
 
   def draw_fog!
+    # This part is a shader but due to time constraints, I'm doing it on the CPU.
+    # If done on the GPU, we could do a single pass and have much better performance.
+    # and also make it more fine-grained and smoother gradients.
+    # doing it on the GPU would require better knowledge of the ruby openGL bindings and shader programming, which I don't have right now. 
+
     cam_x, cam_y = @camera
     cell = 10
     p_i_radius = 80.0
