@@ -12,6 +12,14 @@ class Placeable
     @y = y
     @frames_count = 0
     @spritesheet = nil
+
+    $bus.on(:object_at) do |x, y|
+      next @x == x && @y == y ? self : nil
+    end
+
+    $bus.on(:collides?) do |rect|
+      next collides?(rect) ? :object : nil
+    end
   end
 
   def collides?(rect)
@@ -54,24 +62,40 @@ class Radar < Placeable
   end
 end
 
+class Torch < Placeable
+  def initialize(x, y)
+    super(x, y)
+    @frames_count = 4
+    @spritesheet = Gosu::Image.load_tiles("assets/images/torch.png", 20, 20, retro: true)
+
+    $bus.on(:torch_position) do
+      next rect
+    end
+  end
+end
+
+class Chest < Placeable
+  def initialize(x, y)
+    super(x, y)
+    @frames_count = 1
+    @spritesheet = Gosu::Image.load_tiles("assets/images/chest.png", 20, 20, retro: true)
+  end
+end
+
 class ObjectHandler
   attr_reader :objects
 
   def initialize
     start_room_coords = $bus.get(:start_room_coords)
-    @objects = [Radar.new(start_room_coords[0] / 2 - 1, start_room_coords[1] / 2 - 1)]
-
-    $bus.on_retrievable(:object_at) do |x, y|
-      next @objects.find { |obj| obj.x == x && obj.y == y }
-    end
+    @objects = [
+      Torch.new(start_room_coords[0] / 2 - 1, start_room_coords[1] / 2 - 1),
+      Torch.new(start_room_coords[0] / 2 + 3, start_room_coords[1] / 2),
+      Torch.new(start_room_coords[0] / 2, start_room_coords[1] / 2 - 1),
+    ]
   end
 
   def add(object)
     @objects << object
-  end
-  
-  def collides?(rect)
-    @objects.any? { |obj| obj.collides?(rect) }
   end
 
   def update

@@ -20,7 +20,7 @@ class Window < Gosu::Window
 
     $bus.on(:quit_game) { close! }
 
-    $bus.on_retrievable(:mouse_pos) do
+    $bus.on(:mouse_pos) do
       next mouse_relative(mouse_x, mouse_y)
     end
 

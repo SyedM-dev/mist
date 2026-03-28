@@ -19,7 +19,7 @@ class EnemyAI
     player_tile = [(player_x - 90) / 120, (player_y - 90) / 120].map(&:round)
     enemy_tile  = [(@enemy.x - 90) / 120, (@enemy.y - 90) / 120].map(&:round)
 
-    return if $bus.get(:collides?, @enemy.rect)&.include?(:character)
+    return if $bus.get_all(:collides?, @enemy.rect)&.include?(:character)
 
     object_in_tile = $bus.get(:object_at, enemy_tile[0], enemy_tile[1])
 
@@ -134,7 +134,7 @@ class EnemyAI
     @enemy.x += dx
     @enemy.y += dy
 
-    if $bus.get(:collides?, @enemy.rect)&.include?(:character)
+    if $bus.get_all(:collides?, @enemy.rect)&.include?(:character)
       # Attack player
     end
   end

@@ -15,14 +15,14 @@ class MazeData
 
     return if standalone
 
-    $bus.on_retrievable(:start_room_coords) do
+    $bus.on(:start_room_coords) do
       next @start_room ? [@start_room[0] * 2 + 1, @start_room[1] * 2 + 1] : nil
     end
 
     return unless DEBUG
 
     print_debug
-    $bus.on_retrievable(:boss_room_coords) do
+    $bus.on(:boss_room_coords) do
       next @boss_rooms.first ? [@boss_rooms.first[0] * 2 + 1, @boss_rooms.first[1] * 2 + 1] : nil
     end
   end

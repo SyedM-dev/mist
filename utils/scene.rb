@@ -14,6 +14,6 @@ class Scene
   end
 
   def close
-    $bus.unlisten_owner(self)
+    $bus.remove_owner(self)
   end
 end

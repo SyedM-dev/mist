@@ -27,17 +27,8 @@ class Game < Scene
       @camera = pos
     end
 
-    $bus.on_retrievable(:camera_pos) do
+    $bus.on(:camera_pos) do
       next @camera
-    end
-
-    $bus.on_retrievable(:collides?) do |rect|
-      collisions = []
-      collisions << :wall if @maze.collides?(rect)
-      collisions << :character if @character.collides?(rect)
-      collisions << :enemy if @enemies.collides?(rect)
-      collisions << :object if @objects.collides?(rect)
-      next collisions
     end
   end
 
@@ -74,12 +65,18 @@ class Game < Scene
   def draw_fog!
     cam_x, cam_y = @camera
     cell = 10
-    i_radius = 90.0
-    o_radius = 400.0
+    p_i_radius = 80.0
+    p_o_radius = 350.0
+    t_i_radius = 10.0
+    o_radius = 160.0
 
     # Player screen position
     px = SCREEN_SIZE[0] / 2.0
     py = SCREEN_SIZE[1] / 2.0
+
+    # Collect all light sources (player + torches)
+    torches = $bus.get_all(:torch_position)
+    torch_lights = torches.map { |t| [t[0] - cam_x, t[1] - cam_y] }
 
     tiles_x = (SCREEN_SIZE[0] / cell) + 2
     tiles_y = (SCREEN_SIZE[1] / cell) + 2
@@ -89,21 +86,44 @@ class Game < Scene
         sx = i * cell
         sy = j * cell
 
-        dist = Math.sqrt((sx - px)**2 + (sy - py)**2)
+        light_strength = 0.0
 
-        if dist < i_radius
-          next  # fully clear
-        elsif dist > o_radius
-          alpha = 255
-        else
-          t = (dist - i_radius) / (o_radius - i_radius)  # 0..1
-          world_x = (sx + cam_x) * 0.005
-          world_y = (sy + cam_y) * 0.005
-          # Sample noise at world position so it scrolls with camera
-          # Add time-based offsets for animation
-          noise = (@noise[world_x + Gosu.milliseconds / 5000.0, world_y + Gosu.milliseconds / 6000.0] + 1.0) / 2.0
-          alpha = (t * (1.0 + noise) * 255).to_i.clamp(0, 255)
+        d = Math.sqrt((px - sx)**2 + (py - sy)**2)
+        if d < p_i_radius
+          light_strength = 1.0
+        elsif d < p_o_radius
+          t = (d - p_i_radius) / (p_o_radius - p_i_radius) # 0..1
+          light_strength = 1.0 - t
         end
+
+        torch_lights.each do |lx, ly|
+          d = Math.sqrt((sx - lx)**2 + (sy - ly)**2)
+
+          if d < t_i_radius
+            strength = 1.0
+          elsif d < o_radius
+            t = (d - t_i_radius) / (o_radius - t_i_radius) # 0..1
+            strength = 1.0 - t
+          else
+            strength = 0.0
+          end
+
+          light_strength += strength
+        end
+
+        light_strength = light_strength.clamp(0.0, 1.0)
+
+        t = 1.0 - light_strength
+
+        world_x = (sx + cam_x) * 0.005
+        world_y = (sy + cam_y) * 0.005
+
+        noise = (@noise[
+          world_x + Gosu.milliseconds / 5000.0,
+          world_y + Gosu.milliseconds / 6000.0
+        ] + 1.0) / 2.0
+
+        alpha = (t * (1.0 + noise) * 255).to_i.clamp(0, 255)
 
         Gosu.draw_rect(sx, sy, cell, cell, Gosu::Color.new(alpha, 0, 0, 0), 10000 + sy)
       end

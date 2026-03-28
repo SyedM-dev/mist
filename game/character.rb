@@ -37,8 +37,12 @@ class Character
     @current_animation = :idle_front
     @facing = :front
 
-    $bus.on_retrievable(:player_position) do
+    $bus.on(:player_position) do
       next [@world_x, @world_y]
+    end
+
+    $bus.on(:collides?) do |rect|
+      next collides?(rect) ? :character : nil
     end
   end
 
@@ -95,13 +99,13 @@ class Character
     steps.times do
       # X axis
       @world_x += step_dx
-      if ($bus.get(:collides?, rect) & [:wall, :object])&.any?
+      if ($bus.get_all(:collides?, rect) & [:wall, :object])&.any?
         @world_x -= step_dx
       end
 
       # Y axis
       @world_y += step_dy
-      if ($bus.get(:collides?, rect) & [:wall, :object])&.any?
+      if ($bus.get_all(:collides?, rect) & [:wall, :object])&.any?
         @world_y -= step_dy
       end
     end

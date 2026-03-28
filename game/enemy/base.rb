@@ -10,6 +10,10 @@ class Enemy
     @h = 30
 
     @ai = EnemyAI.new(self, :chase)
+
+    $bus.on(:collides?) do |rect|
+      next collides?(rect) ? :enemy : nil
+    end
   end
 
   def rect
