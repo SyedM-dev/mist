@@ -114,7 +114,7 @@ class Character
     end
 
     # teleport to boss room for debug purposes
-    if DEBUG && Gosu.button_down?(Gosu::KB_T)
+    if $bus.get(:settings, :debug) && Gosu.button_down?(Gosu::KB_T)
       room_coords = $bus.get(:boss_room_coords)
       if room_coords
         @world_x, @world_y = [room_coords[0] * 60 + 5, room_coords[1] * 60 + 5]
@@ -138,7 +138,7 @@ class Character
     frame_index = ((elapsed * 7).floor) % 6
     @animations[@current_animation][frame_index].draw(sprite_x, sprite_y, sprite_y + 30, 1.8, 1.8)
 
-    return unless DEBUG
+    return unless $bus.get(:settings, :debug)
 
     Gosu.draw_rect(cx, cy, SIZE[0], SIZE[1], Gosu::Color.new(0x8000FF00), cy)
   end

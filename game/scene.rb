@@ -38,8 +38,8 @@ class Game < Scene
     @enemies.draw
     @props.draw
     @hud.draw
-    draw_fog!
-    draw_debug! if DEBUG
+    draw_fog! if $bus.get(:settings, :fog)
+    draw_debug! if $bus.get(:settings, :debug)
   end
 
   def draw_debug!

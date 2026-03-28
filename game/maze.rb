@@ -103,7 +103,7 @@ class Maze
 
         @spritesheet[index - 1].draw(screen_x, screen_y, screen_y, scale, scale)
 
-        next unless DEBUG
+        next unless $bus.get(:settings, :debug)
 
         shapes = shapes_for(index, gx * tile_size, gy * tile_size)
         shapes.each do |shape|

@@ -100,7 +100,7 @@ class Prop
       Gosu.draw_rect(bar_x, bar_y, bar_width, bar_height, Gosu::Color::RED, screen_y - 19)
     end
 
-    return unless DEBUG
+    return unless $bus.get(:settings, :debug)
 
     # collision box centered on same point
     Gosu.draw_rect(screen_x - SIZE[0] / 2, screen_y - SIZE[1], *SIZE, Gosu::Color.new(0x88ff0000), Float::INFINITY)

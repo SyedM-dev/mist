@@ -130,7 +130,7 @@ class Inventory
     if id == Gosu::MS_LEFT
       @inventory_selected = type
     elsif id == Gosu::MS_RIGHT
-      if DEBUG && [:wood, :metal, :science].include?(type)
+      if $bus.get(:settings, :debug) && [:wood, :metal, :science].include?(type)
         @grid[row_idx][col_idx][1][0] = max
       else
         craft(type, ctrl: Gosu.button_down?(Gosu::KB_RIGHT_CONTROL) || Gosu.button_down?(Gosu::KB_LEFT_CONTROL))

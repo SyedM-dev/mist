@@ -1,14 +1,14 @@
 require 'gosu'
 
-require_relative 'settings/configuration'
 require_relative 'utils/bus'
+$bus = EventBus.new
+
+require_relative 'settings/configuration'
 require_relative 'utils/utils'
 require_relative 'utils/scene'
 require_relative 'settings/scene'
 require_relative 'menu/scene'
 require_relative 'game/scene'
-
-$bus = EventBus.new
 
 # Main window
 class Window < Gosu::Window

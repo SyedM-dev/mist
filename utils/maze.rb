@@ -26,7 +26,7 @@ class MazeData
       end
     end
 
-    return unless DEBUG
+    return unless $bus.get(:settings, :debug)
 
     print_debug
     $bus.on(:boss_room_coords) do

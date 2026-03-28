@@ -76,7 +76,7 @@ class EnemyAI
   end
 
   def draw
-    return unless DEBUG
+    return unless $bus.get(:settings, :debug)
     cam_x, cam_y = $bus.get(:camera_pos) || [0, 0]
     @waypoints.each do |wx, wy|
       Gosu.draw_rect(wx - cam_x - 5, wy - cam_y - 5, 10, 10, Gosu::Color.new(0x88ffff00), Float::INFINITY)
