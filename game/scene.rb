@@ -37,7 +37,7 @@ class Game < Scene
     @character.draw
     @enemies.draw
     @props.draw
-    draw_fog! if $bus.get(:settings, :fog)
+    $bus.emit(:shade) if $bus.get(:settings, :fog)
     @hud.draw
     draw_debug! if $bus.get(:settings, :debug)
   end
@@ -46,13 +46,6 @@ class Game < Scene
     @font.draw_text("FPS: #{Gosu.fps}", 5, 5, Float::INFINITY, 1, 1, Gosu::Color::YELLOW)
     world_x, world_y = $bus.get(:player_position)&.map(&:round) || [0, 0]
     @font.draw_text("Player: [#{world_x}, #{world_y}]", 5, 30, Float::INFINITY, 1, 1, Gosu::Color::YELLOW)
-  end
-
-  def draw_fog!
-    $bus.emit(:shade)
-    return
-
-    
   end
 
   def draw_floor
