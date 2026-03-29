@@ -19,6 +19,13 @@ class EnemyAI
     player_tile = [(player_x - 90) / 120, (player_y - 90) / 120].map(&:round)
     enemy_tile  = [(@enemy.x - 90) / 120, (@enemy.y - 90) / 120].map(&:round)
 
+    # Don't pathfind if both player and enemy are in the starting room to make sure the player has a safe space to learn the mechanics.
+    start_room_tile = ($bus.get(:start_room_coords) || [0, 0])
+    return if player_tile[0] > start_room_tile[0] - 1 && player_tile[0] < start_room_tile[0] + 3 &&
+              player_tile[1] > start_room_tile[1] - 1 && player_tile[1] < start_room_tile[1] + 3 &&
+              enemy_tile[0] > start_room_tile[0] - 1 && enemy_tile[0] < start_room_tile[0] + 3 &&
+              enemy_tile[1] > start_room_tile[1] - 1 && enemy_tile[1] < start_room_tile[1] + 3
+
     return if $bus.get_all(:collides?, @enemy.rect)&.include?(:character)
 
     prop_in_tile = $bus.get(:prop_at, enemy_tile[0], enemy_tile[1])

@@ -101,7 +101,7 @@ class PropsHandler
         tile = [(player_x - 90) / 120, (player_y - 90) / 120].map(&:round)
         torch = Torch.new(*tile)
         return if @grid[[tile[0], tile[1]]] # can't place if something is already there
-        return if $bus.get_all(:collides?, torch.rect).include?(:character) # can't place if colliding with player
+        return if $bus.get_all(:collides?, torch.collision_rect).include?(:character) # can't place if colliding with player
         return unless $bus.get(:consume, :torch, 1)
         add(torch)
       elsif selected_item == :radar
@@ -109,7 +109,7 @@ class PropsHandler
         tile = [(player_x - 90) / 120, (player_y - 90) / 120].map(&:round)
         radar = Radar.new(*tile)
         return if @grid[[tile[0], tile[1]]]
-        return if $bus.get_all(:collides?, radar.rect).include?(:character)
+        return if $bus.get_all(:collides?, radar.collision_rect).include?(:character)
         return unless $bus.get(:consume, :radar, 1)
         add(radar)
       end
@@ -141,7 +141,7 @@ class PropsHandler
     world_y = y * 120 + 90
     screen_x = world_x - cam_x
     screen_y = world_y - cam_y
-    possible = !$bus.get_all(:collides?, [world_x - 20, world_y - 20, 40, 40]).include?(:character)
+    possible = !$bus.get_all(:collides?, [world_x - Prop::SIZE[0] / 2, world_y - Prop::SIZE[1], *Prop::SIZE]).include?(:character)
     color = possible ? Gosu::Color.new(255 * 0.7, 128, 239, 128) : Gosu::Color.new(255 * 0.7, 255, 116, 108)
     if selected_item == :torch
       Torch.ghost.draw(screen_x - 20, screen_y - 20, screen_y, 2, 2, color)
