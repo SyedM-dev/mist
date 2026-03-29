@@ -1,12 +1,12 @@
 #version 120
 
-uniform vec2 player_pos;
 uniform vec2 resolution; // 720x480
 uniform vec2 offset;     // padding in pixels
 uniform float scale;     // scale factor
 uniform vec2 torch_lights[32];
 uniform int num_torches;
 uniform float time_sec;
+uniform float lorentz_field;
 
 // External snippet 
 // Simplex 2D noise
@@ -49,8 +49,14 @@ void main() {
     return;
   }
 
-  float p_i_radius = 100.0;
-  float p_o_radius = 340.0;
+  // tint
+  vec3 lf_color = vec3(3.0/255.0, 9.0/255.0, 42.0/255.0);
+  vec3 tint = mix(vec3(0.0), lf_color, lorentz_field);
+
+  // radii
+  float p_i_radius = mix(100.0, 120.0, lorentz_field);
+  float p_o_radius = mix(340.0, 235.0, lorentz_field);
+
   float t_i_radius = 10.0;
   float t_o_radius = 160.0;
 
@@ -84,11 +90,10 @@ void main() {
   light_strength = clamp(light_strength, 0.0, 1.0);
 
   // Noise
-  vec2 world_coord = (virtual_coord + player_pos - resolution / 2.0) * 0.005;
-  float noise = (snoise(world_coord + vec2(time_sec / 5.0, time_sec / 6.0)) + 1.0) / 2.0;
+  float noise = (snoise(virtual_coord / resolution * 3.0 + vec2(time_sec * 0.25, 0)) + 1.0) / 2.0;
 
   float t = 1.0 - light_strength;
   float alpha = clamp(t * (1.0 + noise), 0.0, 1.0);
 
-  gl_FragColor = vec4(0.0, 0.0, 0.0, alpha);
+  gl_FragColor = vec4(tint, alpha);
 }

@@ -75,6 +75,8 @@ class Window < Gosu::Window
       torch_lights = torches.map { |t| [t[0] - cam_x, SCREEN_SIZE[1] - (t[1] - cam_y)] }.flatten
     end
 
+    lorentz_field = $bus.get(:lorentz_field) || 0.0
+
     torch_lights = torch_lights.first(32)
     torch_count = torch_lights.size / 2
     torch_lights += [0.0] * (32 - torch_lights.size)
@@ -95,9 +97,6 @@ class Window < Gosu::Window
       scale_loc = GL.GetUniformLocation(@shader, "scale")
       GL.Uniform1f(scale_loc, scale)
 
-      player_loc = GL.GetUniformLocation(@shader, "player_pos")
-      GL.Uniform2f(player_loc, SCREEN_SIZE[0] / 2, SCREEN_SIZE[1] / 2)
-
       torches_loc = GL.GetUniformLocation(@shader, "torch_lights")
       GL.Uniform2fv(torches_loc, torch_lights.size / 2, torch_lights.pack("f*"))
 
@@ -106,6 +105,9 @@ class Window < Gosu::Window
 
       time_loc = GL.GetUniformLocation(@shader, "time_sec")
       GL.Uniform1f(time_loc, Gosu.milliseconds / 1000.0)
+
+      lorentz_loc = GL.GetUniformLocation(@shader, "lorentz_field")
+      GL.Uniform1f(lorentz_loc, lorentz_field)
 
       GL.Begin(GL::QUADS)
         GL.Vertex2f(-1, -1)

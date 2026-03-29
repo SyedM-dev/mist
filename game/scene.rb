@@ -2,6 +2,7 @@ require_relative 'maze'
 require_relative 'hud/layer'
 require_relative 'props/handler'
 require_relative 'enemy/handler'
+require_relative 'weapons/handler'
 require_relative 'character'
 
 require 'perlin'
@@ -17,6 +18,7 @@ class Game < Scene
     @character = Character.new
     @enemies = EnemyHandler.new
     @props = PropsHandler.new
+    @weapons = WeaponHandler.new
 
     @hud = HUDLayer.new
 
@@ -39,6 +41,7 @@ class Game < Scene
     @props.draw
     $bus.emit(:shade) if $bus.get(:settings, :fog)
     @hud.draw
+    @weapons.draw
     draw_debug! if $bus.get(:settings, :debug)
   end
 
@@ -71,6 +74,7 @@ class Game < Scene
     @character.update(dt)
     @enemies.update(dt)
     @props.update(dt)
+    @weapons.update(dt)
   end
 
   def button_down(id, pos)
@@ -78,5 +82,8 @@ class Game < Scene
 
     return if @hud.button_down(id, pos)
     return if @props.button_down(id, pos)
+    #return if @weapons.button_down(id, pos)
+
+    #@character.button_down(id)
   end
 end
