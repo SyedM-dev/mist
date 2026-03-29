@@ -8,16 +8,25 @@ module Config
   @config = {
     debug: ARGV.include?("--debug"),
     fog: true,
-    torches_lightup: false
+    torches_lightup: true,
   }
-
-  $bus.on(:settings) do |k|
-    next @config[k]
+  
+  if File.exist?("config.json")
+    data = JSON.parse(File.read("config.json"))
+    @config.merge!(data.transform_keys(&:to_sym))
   end
+
+  $bus.on(:settings) { |k| @config[k] }
 
   module_function
 
   def toggle(key)
     @config[key] = !@config[key]
+  end
+
+  def persist!
+    File.open("config.json", "w") do |f|
+      f.write(JSON.pretty_generate(@config))
+    end
   end
 end
