@@ -25,10 +25,10 @@ class EnemyAI
 
     if player_tile == enemy_tile
       los_blocked = !prop_in_tile.nil? && !(
-        line_of_sight?(@enemy.x - @enemy.w / 2, @enemy.y - @enemy.h / 2, player_x, player_y, prop_in_tile.rect) &&
-        line_of_sight?(@enemy.x + @enemy.w / 2, @enemy.y + @enemy.h / 2, player_x, player_y, prop_in_tile.rect) &&
-        line_of_sight?(@enemy.x - @enemy.w / 2, @enemy.y + @enemy.h / 2, player_x, player_y, prop_in_tile.rect) &&
-        line_of_sight?(@enemy.x + @enemy.w / 2, @enemy.y - @enemy.h / 2, player_x, player_y, prop_in_tile.rect)
+        line_of_sight?(@enemy.x - @enemy.w / 2, @enemy.y - @enemy.h / 2, player_x, player_y, prop_in_tile.collision_rect) &&
+        line_of_sight?(@enemy.x + @enemy.w / 2, @enemy.y + @enemy.h / 2, player_x, player_y, prop_in_tile.collision_rect) &&
+        line_of_sight?(@enemy.x - @enemy.w / 2, @enemy.y + @enemy.h / 2, player_x, player_y, prop_in_tile.collision_rect) &&
+        line_of_sight?(@enemy.x + @enemy.w / 2, @enemy.y - @enemy.h / 2, player_x, player_y, prop_in_tile.collision_rect)
       )
 
       if los_blocked
