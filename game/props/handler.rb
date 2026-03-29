@@ -20,7 +20,7 @@ class PropsHandler
     end
 
     $bus.on(:nearby_torches) do |rect|
-      nearby_props(rect).select { |p| p.is_a?(Torch) }.map { |t| t.rect }
+      nearby_props(rect).select { |p| p.is_a?(Torch) }.map(&:rect).map { |t| [t[0] + t[2] / 2, t[1] + t[3] / 2] }
     end
   end
 
