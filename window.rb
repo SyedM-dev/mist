@@ -70,7 +70,7 @@ class Window < Gosu::Window
     # Only calculate torch lights if the setting is enabled, to save performance
     if $bus.get(:settings, :torches_lightup)
       torches = $bus.get(:nearby_torches,
-      [cam_x - SCREEN_SIZE[0] / 2, cam_y - SCREEN_SIZE[1] / 2, SCREEN_SIZE[0] * 2, SCREEN_SIZE[1] * 2]
+      [cam_x - SCREEN_SIZE[0], cam_y - SCREEN_SIZE[1], SCREEN_SIZE[0] * 4, SCREEN_SIZE[1] * 4]
       ) || []
       torch_lights = torches.map { |t| [t[0] - cam_x, SCREEN_SIZE[1] - (t[1] - cam_y)] }.flatten
     end
