@@ -8,6 +8,7 @@ uniform vec2 torch_lights[32];
 uniform int num_torches;
 uniform float time_sec;
 
+// External snippet 
 // Simplex 2D noise
 // Source: https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
 vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
@@ -38,6 +39,7 @@ float snoise(vec2 v){
   g.yz = a0.yz * x12.xz + h.yz * x12.yw;
   return 130.0 * dot(m, g);
 }
+// End of external snippet.
 
 void main() {
   vec2 virtual_coord = (gl_FragCoord.xy - offset) / scale;
