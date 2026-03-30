@@ -1,14 +1,14 @@
 require_relative 'ai'
 
 class Enemy
-  attr_accessor :x, :y, :w, :h
+  attr_accessor :x, :y, :w, :h, :lorentz
 
   def self.load(path, w, h, s)
     # Once artwork is done need to load each animation here.
     # But as artwork takes time, for now just load a single image.
     @sprite = Gosu::Image.new(path, retro: true)
-    @i_w = w
-    @i_h = h
+    @i_w = w * s
+    @i_h = h * s
     @s = s
   end
 
@@ -20,16 +20,31 @@ class Enemy
     [@i_w, @i_h, @s]
   end
 
-  def initialize(x, y)
+  def initialize(x, y, health = 100)
     @x = x
     @y = y
     @w = 25
     @h = 30
+    @health = health
+    @lorentz = false
+
+    $bus.on(:lorentz_field?) do |lorentz|
+      @lorentz = lorentz
+    end
 
     @ai = EnemyAI.new(self, :chase)
 
     $bus.on(:collides?) do |rect|
       next collides?(rect) ? :enemy : nil
+    end
+  end
+
+  def take_damage(amount)
+    @health -= amount
+    pp "Enemy takes #{amount} damage, health now #{@health}"
+    if @health <= 0
+      pp "Enemy dies"
+      $bus.emit(:enemy_died, self)
     end
   end
 
@@ -53,16 +68,17 @@ class Enemy
     screen_x = @x - cam_x
     screen_y = @y - cam_y
 
-
     self.class.sprite.draw(
-      screen_x - self.class.frame_size[0],
-      screen_y - self.class.frame_size[1],
-      screen_y - self.class.frame_size[1],
+      screen_x - self.class.frame_size[0] / 2,
+      screen_y - self.class.frame_size[1] / 2,
+      screen_y - self.class.frame_size[1] / 2 + 10,
       self.class.frame_size[2],
       self.class.frame_size[2]
     )
 
-    Gosu.draw_rect(screen_x - @w / 2, screen_y - @h / 2, @w, @h, Gosu::Color.new(0x40FF0000), Float::INFINITY) if $bus.get(:settings, :debug)
+    if $bus.get(:settings, :debug)
+      Gosu.draw_rect(screen_x - @w / 2, screen_y - @h / 2, @w, @h, Gosu::Color.new(0x40FF0000), Float::INFINITY)
+    end
 
     @ai.draw
   end

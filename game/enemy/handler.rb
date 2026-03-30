@@ -3,6 +3,11 @@ require_relative 'force'
 class EnemyHandler
   def initialize
     @enemies = []
+
+    $bus.on(:enemy_died) do |enemy|
+      $bus.remove_owner(enemy)
+      @enemies.delete(enemy)
+    end
   end
 
   def update(dt)

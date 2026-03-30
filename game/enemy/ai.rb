@@ -2,6 +2,7 @@ class EnemyAI
   AGGRO_RADIUS = 2000
   BASE_SPEED = 130.0
   CORNER_OFFSET = 35 # how far from tile center to place corner waypoint
+  ATTACK_COOLDOWN = 0.2 # seconds
 
   def initialize(enemy, type)
     @enemy = enemy
@@ -11,22 +12,14 @@ class EnemyAI
     @last_player_tile = nil
     @avoiding_obstacle = false
     @speed = BASE_SPEED
-    @lorentz_effect_active = false
-
-    $bus.on(:lorentz_field) do
-      @lorentz_effect_active = true
-    end
-
-    $bus.on(:lorentz_field_end) do
-      @lorentz_effect_active = false
-    end
+    @time_since_attack = ATTACK_COOLDOWN
   end
 
   def update(player_x, player_y, dt)
     distance = Math.sqrt((player_x - @enemy.x)**2 + (player_y - @enemy.y)**2)
     return unless distance < AGGRO_RADIUS
 
-    if @lorentz_effect_active && distance < 230
+    if @enemy.lorentz && distance < 230
       @speed = BASE_SPEED * 0.3
     else
       @speed = BASE_SPEED
@@ -42,7 +35,14 @@ class EnemyAI
               enemy_tile[0] > start_room_tile[0] - 1 && enemy_tile[0] < start_room_tile[0] + 3 &&
               enemy_tile[1] > start_room_tile[1] - 1 && enemy_tile[1] < start_room_tile[1] + 3
 
-    return if $bus.get_all(:collides?, @enemy.rect)&.include?(:character)
+    if $bus.get_all(:collides?, @enemy.rect)&.include?(:character)
+      if @time_since_attack >= ATTACK_COOLDOWN
+        $bus.emit(:enemy_attack, 10) # deal 10 damage
+        @time_since_attack = 0
+      end
+      @time_since_attack += dt
+      return
+    end
 
     prop_in_tile = $bus.get(:prop_at, enemy_tile[0], enemy_tile[1])
 
@@ -150,15 +150,14 @@ class EnemyAI
   end
 
   def move_towards(target_x, target_y, dt)
-    angle = Gosu.angle(@enemy.x, @enemy.y, target_x, target_y)
-    dx = Gosu.offset_x(angle, @speed * dt)
-    dy = Gosu.offset_y(angle, @speed * dt)
+    dx_raw = target_x - @enemy.x
+    dy_raw = target_y - @enemy.y
+    angle = Math.atan2(dy_raw, dx_raw)
+
+    dx = Math.cos(angle) * @speed * dt
+    dy = Math.sin(angle) * @speed * dt
 
     @enemy.x += dx
     @enemy.y += dy
-
-    if $bus.get_all(:collides?, @enemy.rect)&.include?(:character)
-      # Attack player
-    end
   end
 end

@@ -5,6 +5,10 @@ class HUDLayer
     @hud_bg = Gosu::Image.new("assets/images/hud.png", retro: true)
     @hud_fg = Gosu::Image.new("assets/images/hud_fg.png", retro: true)
     @inventory = Inventory.new
+
+    $bus.on(:enemy_attack) do |damage|
+      pp "Player takes #{damage} damage!"
+    end
   end
 
   def draw

@@ -3,4 +3,5 @@
   "editor.insertSpaces": true,
   "editor.fontFamily": "'Operator Mono Lig', monospace",
   "editor.fontSize": 14,
+  "editor.fontLigatures": true,
 }

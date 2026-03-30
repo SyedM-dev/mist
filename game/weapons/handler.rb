@@ -1,5 +1,5 @@
 require_relative 'lorentz_field'
-#require_relative 'occams_razor'
+require_relative 'occams_razor'
 #require_relative 'quantum_bow'
 #require_relative 'blade_of_recursion'
 
@@ -7,7 +7,7 @@ class WeaponHandler
   def initialize
     @weapons = {
       lorentz_field: LorentzField.new,
-      #occams_razor: OccamsRazor.new,
+      occams_razor: OccamsRazor.new,
       #quantum_bow: QuantumBow.new,
       #blade_of_recursion: BladeOfRecursion.new
     }
