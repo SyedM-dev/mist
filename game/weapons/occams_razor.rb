@@ -8,7 +8,7 @@ class OccamsRazor
     @range = 45 # how many pixels from player center to enemy center the attack hits, this is a melee weapon so it should be small
   end
 
-  def attack
+  def attack(_direction)
     return if @active
 
     @active = true
@@ -16,7 +16,7 @@ class OccamsRazor
 
     # Check for enemies in range and deal damage
     player_x, player_y = $bus.get(:player_position)
-    $bus.emit(:occams_razor_attack, player_x, player_y, @range, @damage)
+    $bus.emit(:attack, player_x, player_y, @range, @damage)
   end
 
   def update(dt)

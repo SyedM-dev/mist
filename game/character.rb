@@ -35,7 +35,7 @@ class Character
     end
 
     @current_animation = :idle_front
-    @facing = :front
+    @facing = 0.0
 
     $bus.on(:player_position) do
       next [@world_x, @world_y]
@@ -43,6 +43,10 @@ class Character
 
     $bus.on(:collides?) do |rect|
       next collides?(rect) ? :character : nil
+    end
+
+    $bus.on(:player_direction) do
+      @facing
     end
   end
 
@@ -54,6 +58,18 @@ class Character
   def collides?(rect)
     return true if intersects?(self.rect, rect)
     false
+  end
+
+  def angle_to_direction(angle)
+    if angle >= -Math::PI / 4 && angle < Math::PI / 4
+      :right
+    elsif angle >= Math::PI / 4 && angle < 3 * Math::PI / 4
+      :front   # down
+    elsif angle >= -3 * Math::PI / 4 && angle < -Math::PI / 4
+      :back    # up
+    else
+      :left
+    end
   end
 
   def update(dt)
@@ -68,18 +84,11 @@ class Character
     moving = dx != 0 || dy != 0
 
     if moving
-      if dy < 0
-        @facing = :back
-      elsif dy > 0
-        @facing = :front
-      elsif dx < 0
-        @facing = :left
-      elsif dx > 0
-        @facing = :right
-      end
+      @facing = Math.atan2(dy, dx)
     end
 
-    @current_animation = moving ? :"walk_#{@facing}" : :"idle_#{@facing}"
+    direction = angle_to_direction(@facing)
+    @current_animation = moving ? :"walk_#{direction}" : :"idle_#{direction}"
 
     # Normalize vector if moving diagonally
     if dx != 0 && dy != 0

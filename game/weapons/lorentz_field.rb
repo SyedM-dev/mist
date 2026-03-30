@@ -6,6 +6,10 @@ class LorentzField
     @active = false
     @font = Gosu::Font.new(24, name: "assets/fonts/tn.ttf")
 
+    $bus.on(:lorentz_field?) do
+      next @active
+    end
+
     $bus.on(:lorentz_field) do
       if @active
         t = @time
@@ -27,12 +31,12 @@ class LorentzField
     end
   end
 
-  def attack
+  def attack(_direction)
     return if @active
     $bus.emit(:consume, :lorentz_field, 1)
     @active = true
     @time = 0
-    $bus.emit(:lorentz_field?, true)
+    $bus.emit(:lorentz_field!, true)
   end
 
   def update(dt)
@@ -42,7 +46,7 @@ class LorentzField
     if @time >= BASE_TIME
       @time = 0
       @active = false
-      $bus.emit(:lorentz_field?, false)
+      $bus.emit(:lorentz_field!, false)
     end
   end
 

@@ -1,13 +1,15 @@
 require_relative "inventory"
+require_relative "health"
 
 class HUDLayer
   def initialize
     @hud_bg = Gosu::Image.new("assets/images/hud.png", retro: true)
     @hud_fg = Gosu::Image.new("assets/images/hud_fg.png", retro: true)
     @inventory = Inventory.new
+    @health = HealthBar.new(100)
 
     $bus.on(:enemy_attack) do |damage|
-      pp "Player takes #{damage} damage!"
+      @health.take_damage(damage)
     end
   end
 
@@ -15,6 +17,7 @@ class HUDLayer
     @hud_bg.draw(0, 0, Float::INFINITY)
 
     @inventory.draw
+    @health.draw(10, 10)
 
     @hud_fg.draw(0, 0, Float::INFINITY)
   end

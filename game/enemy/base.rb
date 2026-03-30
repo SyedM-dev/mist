@@ -26,9 +26,9 @@ class Enemy
     @w = 25
     @h = 30
     @health = health
-    @lorentz = false
+    @lorentz = $bus.get(:lorentz_field?) || false
 
-    $bus.on(:lorentz_field?) do |lorentz|
+    $bus.on(:lorentz_field!) do |lorentz|
       @lorentz = lorentz
     end
 
@@ -41,9 +41,7 @@ class Enemy
 
   def take_damage(amount)
     @health -= amount
-    pp "Enemy takes #{amount} damage, health now #{@health}"
     if @health <= 0
-      pp "Enemy dies"
       $bus.emit(:enemy_died, self)
     end
   end
@@ -75,6 +73,11 @@ class Enemy
       self.class.frame_size[2],
       self.class.frame_size[2]
     )
+
+    # Health bar
+
+    health_width = (@w * @health / 100.0)
+    Gosu.draw_rect(screen_x - @w / 2, screen_y - @h / 2 - 10, health_width, 5, Gosu::Color.new(0xFF00FF00), Float::INFINITY)
 
     if $bus.get(:settings, :debug)
       Gosu.draw_rect(screen_x - @w / 2, screen_y - @h / 2, @w, @h, Gosu::Color.new(0x40FF0000), Float::INFINITY)
