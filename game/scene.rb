@@ -5,13 +5,10 @@ require_relative 'enemy/handler'
 require_relative 'weapons/handler'
 require_relative 'character'
 
-require 'perlin'
-
 class Game < Scene
   def initialize
     super
     @font = Gosu::Font.new(24)
-    @noise = Perlin::Generator.new(rand(1...1000), 1.0, 1)
     @floor_image = Gosu::Image.new("assets/images/floor.png", retro: true)
 
     @maze = Maze.new

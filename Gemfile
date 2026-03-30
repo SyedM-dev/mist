@@ -1,4 +1,4 @@
 source "https://rubygems.org"
 
 gem "gosu"
-gem "perlin"
+gem "ruby-opengl2"

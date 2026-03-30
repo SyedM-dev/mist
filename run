@@ -2,6 +2,6 @@
 
 # Dependencies
 # Gosu for rendering and input
-# Perlin noise for fog effect
+# Ruby-OpenGL2 for shaders
 
 load 'main.rb'
