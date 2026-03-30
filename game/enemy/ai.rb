@@ -1,6 +1,6 @@
 class EnemyAI
   AGGRO_RADIUS = 2000
-  SPEED = 120.0
+  BASE_SPEED = 130.0
   CORNER_OFFSET = 35 # how far from tile center to place corner waypoint
 
   def initialize(enemy, type)
@@ -10,11 +10,27 @@ class EnemyAI
     @waypoints = []    # actual world positions to move through
     @last_player_tile = nil
     @avoiding_obstacle = false
+    @speed = BASE_SPEED
+    @lorentz_effect_active = false
+
+    $bus.on(:lorentz_field) do
+      @lorentz_effect_active = true
+    end
+
+    $bus.on(:lorentz_field_end) do
+      @lorentz_effect_active = false
+    end
   end
 
   def update(player_x, player_y, dt)
-    distance = Gosu.distance(@enemy.x, @enemy.y, player_x, player_y)
+    distance = Math.sqrt((player_x - @enemy.x)**2 + (player_y - @enemy.y)**2)
     return unless distance < AGGRO_RADIUS
+
+    if @lorentz_effect_active && distance < 230
+      @speed = BASE_SPEED * 0.3
+    else
+      @speed = BASE_SPEED
+    end
 
     player_tile = [(player_x - 90) / 120, (player_y - 90) / 120].map(&:round)
     enemy_tile  = [(@enemy.x - 90) / 120, (@enemy.y - 90) / 120].map(&:round)
@@ -135,8 +151,8 @@ class EnemyAI
 
   def move_towards(target_x, target_y, dt)
     angle = Gosu.angle(@enemy.x, @enemy.y, target_x, target_y)
-    dx = Gosu.offset_x(angle, SPEED * dt)
-    dy = Gosu.offset_y(angle, SPEED * dt)
+    dx = Gosu.offset_x(angle, @speed * dt)
+    dy = Gosu.offset_y(angle, @speed * dt)
 
     @enemy.x += dx
     @enemy.y += dy

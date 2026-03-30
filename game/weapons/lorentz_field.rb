@@ -32,6 +32,7 @@ class LorentzField
     $bus.emit(:consume, :lorentz_field, 1)
     @active = true
     @time = 0
+    $bus.emit(:lorentz_field)
   end
 
   def update(dt)
@@ -41,6 +42,7 @@ class LorentzField
     if @time >= BASE_TIME
       @time = 0
       @active = false
+      $bus.emit(:lorentz_field_end)
     end
   end
 

@@ -1,4 +1,4 @@
-require_relative 'base'
+require_relative 'force'
 
 class EnemyHandler
   def initialize
@@ -14,7 +14,7 @@ class EnemyHandler
     # For now, just spawn a single enemy at a fixed location
     start_room_coords = $bus.get(:start_room_coords)
     if @enemies.empty?
-      @enemies << Enemy.new((start_room_coords[0] * 2 + 1 + 4) * 60 + 30, (start_room_coords[1] * 2 + 1 + 4) * 60 + 30)
+      @enemies << Force.new((start_room_coords[0] * 2 + 1 + 4) * 60 + 30, (start_room_coords[1] * 2 + 1 + 4) * 60 + 30)
     end
   end
 
