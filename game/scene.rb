@@ -25,6 +25,8 @@ class Game < Scene
 
     @camera = [0, 0]
 
+    $bus.emit(:log, "Welcome to the Mist! Use WASD to move, SPACE or left-click to attack with your equipped weapon, and ESC to return to the menu.")
+
     $bus.on(:player_move) do |pos|
       @camera = pos
     end
@@ -88,6 +90,7 @@ class Game < Scene
     @props.update(dt)
     @traps.update(dt)
     @weapons.update(dt)
+    @hud.update(dt)
   end
 
   def button_down(id, pos)
