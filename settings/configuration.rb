@@ -16,7 +16,7 @@ module Config
     @config.merge!(data.transform_keys(&:to_sym))
   end
 
-  $bus.on(:settings) { |k| @config[k] }
+  $bus.on(:settings, :master) { |k| @config[k] }
 
   module_function
 

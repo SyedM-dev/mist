@@ -1,15 +1,14 @@
-class Menu < Scene
+class GameOver < Scene
   OPTIONS = {
-    "Start" => -> { $bus.emit(:change_scene, Game) },
-    "Settings" => -> { $bus.emit(:change_scene, Settings) },
-    "Quit" => -> { $bus.emit(:quit_game) }
+    "Retry" => -> { $bus.emit(:change_scene, Game) },
+    "Main Menu" => -> { $bus.emit(:change_scene, Menu) }
   }.freeze
 
   def initialize
     super
     @font = Gosu::Font.new(32, name: "assets/fonts/tn.ttf")
     @selected_index = 0
-    @bg_image = Gosu::Image.new("assets/images/menu_bg.png", retro: true)
+    @bg_image = Gosu::Image.new("assets/images/game_over_bg.png", retro: true)
     @last_mouse_pos = nil
   end
 

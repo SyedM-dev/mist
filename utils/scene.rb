@@ -12,8 +12,4 @@ class Scene
 
   def button_down(id, pos)
   end
-
-  def close
-    $bus.remove_owner(self)
-  end
 end

@@ -12,7 +12,7 @@ class EventBus
   end
 
   # Subscribe to an event
-  def on(event, owner: nil, &callback)
+  def on(event, owner = nil, &callback)
     owner ||= callback.binding.eval("self")
     @events[event] << { callback: callback, owner: owner }
   end
@@ -51,9 +51,14 @@ class EventBus
     results
   end
 
-  # Unsubscribe all events for a given owner (e.g. when an object is destroyed)
+  def reset
+    @events.each do |_, handlers|
+      handlers.reject! { |h| h[:owner] != :master }
+    end
+  end
+
   def remove_owner(owner)
-    @events.each do |event, handlers|
+    @events.each do |_, handlers|
       handlers.reject! { |h| h[:owner] == owner }
     end
   end

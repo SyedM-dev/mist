@@ -17,7 +17,7 @@ class HUDLayer
     @hud_bg.draw(0, 0, Float::INFINITY)
 
     @inventory.draw
-    @health.draw(10, 10)
+    @health.draw
 
     @hud_fg.draw(0, 0, Float::INFINITY)
   end

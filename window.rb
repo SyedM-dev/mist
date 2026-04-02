@@ -7,6 +7,7 @@ require_relative 'utils/utils'
 require_relative 'utils/scene'
 require_relative 'settings/scene'
 require_relative 'menu/scene'
+require_relative 'game_over/scene'
 require_relative 'game/scene'
 
 class Window < Gosu::Window
@@ -23,18 +24,18 @@ class Window < Gosu::Window
     @scene = Menu.new
     @last_time = Gosu.milliseconds
 
-    $bus.on(:quit_game) { close! }
+    $bus.on(:quit_game, :master) { close! }
 
-    $bus.on(:mouse_pos) do
+    $bus.on(:mouse_pos, :master) do
       next mouse_relative(mouse_x, mouse_y)
     end
 
-    $bus.on(:change_scene) do |new_scene|
-      @scene.close
-      @scene = new_scene
+    $bus.on(:change_scene, :master) do |new_scene|
+      $bus.reset
+      @scene = new_scene.new
     end
 
-    $bus.on(:shade) do
+    $bus.on(:shade, :master) do
       shade!
     end
   end
