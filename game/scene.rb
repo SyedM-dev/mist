@@ -95,7 +95,7 @@ class Game < Scene
 
     return if @hud.button_down(id, pos)
     return if @props.button_down(id, pos)
-    #return if @weapons.button_down(id, pos)
+    return if @weapons.button_down(id, pos)
 
     #@character.button_down(id)
   end
