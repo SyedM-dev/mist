@@ -4,6 +4,17 @@ class HealthBar
   def initialize(max_health)
     @max_health = max_health
     @health = max_health
+
+    $bus.on(:blast) do |x, y, radius, damage, safety|
+      next if safety == :safe
+
+      player_x, player_y = $bus.get(:player_position)
+
+      dist = Math.hypot(player_x - x, player_y - y)
+      if dist <= radius + 20
+        take_damage(damage)
+      end
+    end
   end
 
   def take_damage(amount)

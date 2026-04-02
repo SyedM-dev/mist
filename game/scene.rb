@@ -3,6 +3,7 @@ require_relative 'hud/layer'
 require_relative 'props/handler'
 require_relative 'enemy/handler'
 require_relative 'weapons/handler'
+require_relative 'traps/handler'
 require_relative 'character'
 
 class Game < Scene
@@ -11,11 +12,14 @@ class Game < Scene
     @font = Gosu::Font.new(24)
     @floor_image = Gosu::Image.new("assets/images/floor.png", retro: true)
 
+    @blasted = 0
+
     @maze = Maze.new
     @character = Character.new
     @enemies = EnemyHandler.new
     @props = PropsHandler.new
     @weapons = WeaponHandler.new
+    @traps = TrapHandler.new
 
     @hud = HUDLayer.new
 
@@ -28,14 +32,25 @@ class Game < Scene
     $bus.on(:camera_pos) do
       next @camera
     end
+
+    $bus.on(:blast) do |_|
+      @blasted = 10 # blast for 10 frames
+    end
   end
 
   def draw
+    if @blasted != 0
+      # this is a terrible animation for blasting but that would require me to work on artwork and I don't have time for that, so let's just flash the screen white and fade it out
+      Gosu.draw_rect(0, 0, *SCREEN_SIZE, Gosu::Color.new(@blasted * 255 / 10, 255, 255, 255), Float::INFINITY)
+      @blasted -= 1
+      return
+    end
     draw_floor
     @maze.draw
     @character.draw
     @enemies.draw
     @props.draw
+    @traps.draw
     $bus.emit(:shade) if $bus.get(:settings, :fog)
     @hud.draw
     @weapons.draw
@@ -71,6 +86,7 @@ class Game < Scene
     @character.update(dt)
     @enemies.update(dt)
     @props.update(dt)
+    @traps.update(dt)
     @weapons.update(dt)
   end
 

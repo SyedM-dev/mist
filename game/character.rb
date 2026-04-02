@@ -122,6 +122,10 @@ class Character
       end
     end
 
+    if $bus.get_all(:collides?, rect).include?(:trap)
+      $bus.emit(:trap_stepped_on, rect, :character)
+    end
+
     # teleport to boss room for debug purposes
     if $bus.get(:settings, :debug) && Gosu.button_down?(Gosu::KB_T)
       room_coords = $bus.get(:boss_room_coords)

@@ -15,7 +15,7 @@ class EnemyAI
     @time_since_attack = ATTACK_COOLDOWN
   end
 
-  def update(player_x, player_y, dt)
+  def update(player_x, player_y, dt, force = false)
     distance = Math.sqrt((player_x - @enemy.x)**2 + (player_y - @enemy.y)**2)
     return unless distance < AGGRO_RADIUS
 
@@ -76,7 +76,7 @@ class EnemyAI
       end
     end
 
-    if @waypoints.empty? || @last_player_tile != player_tile
+    if force || @waypoints.empty? || @last_player_tile != player_tile
       @last_player_tile = player_tile
       @tile_path = $bus.get(:maze_solve, enemy_tile[0], enemy_tile[1], player_tile[0], player_tile[1]) || []
       if $bus.get(:prop_at, enemy_tile[0], enemy_tile[1]).nil?

@@ -26,6 +26,8 @@ class Enemy
     @w = 25
     @h = 30
     @health = health
+    @stun = 0
+    @last_lock = :none
     @lorentz = $bus.get(:lorentz_field?) || false
 
     $bus.on(:lorentz_field!) do |lorentz|
@@ -36,6 +38,20 @@ class Enemy
 
     $bus.on(:collides?) do |rect|
       next collides?(rect) ? :enemy : nil
+    end
+
+    $bus.on(:blast) do |x, y, radius, damage, _|
+      dist = Math.hypot(@x - x, @y - y)
+      if dist <= radius + 20
+        take_damage(damage * 2)
+      end
+    end
+
+    $bus.on(:stun)  do |x, y|
+      dist = Math.hypot(@x - x, @y - y)
+      if dist <= 100
+        @stun = 60 * 1 # stun for 1 second
+      end
     end
   end
 
@@ -56,8 +72,24 @@ class Enemy
   end
 
   def update(dt)
+    if @stun > 0
+      @stun -= 1
+      return
+    end
+
     player_pos = $bus.get(:player_position)
-    @ai.update(*player_pos, dt) if player_pos
+    closest_event_horizon = $bus.get(:closest_event_horizon, @x, @y, 200)
+    if closest_event_horizon
+      @ai.update(*closest_event_horizon, dt, @last_lock != :event_horizon)
+      @last_lock = :event_horizon
+    else
+      @ai.update(*player_pos, dt, @last_lock != :player) if player_pos
+      @last_lock = :player
+    end
+
+    if $bus.get_all(:collides?, rect).include?(:trap)
+      $bus.emit(:trap_stepped_on, rect, :enemy)
+    end
   end
 
   def draw

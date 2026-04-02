@@ -27,7 +27,7 @@ class GameOver < Scene
     @bg_image.draw(0, 0, 1)
 
     OPTIONS.each_with_index do |(text, _), index|
-      y = 260 + index * 50
+      y = 360 + index * 50
       if index == @selected_index
         @font.draw_text("[ #{text.ljust(10)} ]", 50, y, 1, 1, 1, Gosu::Color::YELLOW)
       else
@@ -56,7 +56,7 @@ class GameOver < Scene
 
   def item_at(pos)
     OPTIONS.each_with_index do |(_, action), index|
-      y = 260 + index * 50
+      y = 360 + index * 50
       if pos[1].between?(y, y + 32) && pos[0].between?(50, 50 + @font.text_width(" " * 14))
         return [index, action]
       end
