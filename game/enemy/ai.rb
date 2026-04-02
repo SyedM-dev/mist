@@ -1,28 +1,27 @@
 class EnemyAI
-  AGGRO_RADIUS = 2000
-  BASE_SPEED = 130.0
   CORNER_OFFSET = 35 # how far from tile center to place corner waypoint
   ATTACK_COOLDOWN = 0.2 # seconds
 
   def initialize(enemy, type)
     @enemy = enemy
     @type = type
+    @base_speed = case type
+                  when :komodo then 60
+                  when :force then 130
+                  end
     @tile_path = []    # raw tile coords from solver
     @waypoints = []    # actual world positions to move through
     @last_player_tile = nil
     @avoiding_obstacle = false
-    @speed = BASE_SPEED
+    @speed = @base_speed
     @time_since_attack = ATTACK_COOLDOWN
   end
 
   def update(player_x, player_y, dt, force = false)
-    distance = Math.sqrt((player_x - @enemy.x)**2 + (player_y - @enemy.y)**2)
-    return unless distance < AGGRO_RADIUS
-
     if @enemy.lorentz && distance < 230
-      @speed = BASE_SPEED * 0.3
+      @speed = @base_speed * 0.3
     else
-      @speed = BASE_SPEED
+      @speed = @base_speed
     end
 
     player_tile = [(player_x - 90) / 120, (player_y - 90) / 120].map(&:round)

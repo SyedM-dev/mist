@@ -1,13 +1,12 @@
 require_relative 'base'
 
-class Force < Enemy
-  load 'assets/images/force.png', 21, 32, 1.7
+class Komodo < Enemy
+  load 'assets/images/komodo.png', 31, 48, 1.7
 
   def initialize(x, y)
-    super(x, y, :force, 100)
+    super(x, y, :komodo, 1000)
 
     $bus.on(:attack) do |attack_x, attack_y, range, damage|
-      # Whoa, did'nt know ruby had hypot functions built in!
       if Math.hypot(@x - attack_x, @y - attack_y) <= range
         take_damage(damage)
         next true

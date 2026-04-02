@@ -1,4 +1,5 @@
 require_relative 'force'
+require_relative 'komodo'
 
 class EnemyHandler
   def initialize
@@ -16,10 +17,11 @@ class EnemyHandler
   end
 
   def spawn!
-    # For now, just spawn a single enemy at a fixed location
-    start_room_coords = $bus.get(:start_room_coords)
-    if @enemies.empty? && start_room_coords
-      @enemies << Force.new((start_room_coords[0] * 2 + 1 + 4) * 60 + 30, (start_room_coords[1] * 2 + 1 + 4) * 60 + 30)
+    boss_rooms = $bus.get(:boss_rooms) || []
+    if @enemies.count < 4 && rand < (1.0 / (60 * 10))
+      boss_room = boss_rooms.sample
+      type = rand < 0.1 ? Komodo : Force
+      @enemies << (type).new((boss_room[0] * 2 + 4) * 60 + 30, (boss_room[1] * 2 + 4) * 60 + 30)
     end
   end
 

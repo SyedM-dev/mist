@@ -20,12 +20,14 @@ class Enemy
     [@i_w, @i_h, @s]
   end
 
-  def initialize(x, y, health = 100)
+  def initialize(x, y, type, health = 100)
     @x = x
     @y = y
     @w = 25
     @h = 30
+    @max_health = health
     @health = health
+    @type = type
     @stun = 0
     @last_lock = :none
     @lorentz = $bus.get(:lorentz_field?) || false
@@ -34,7 +36,7 @@ class Enemy
       @lorentz = lorentz
     end
 
-    @ai = EnemyAI.new(self, :chase)
+    @ai = EnemyAI.new(self, @type)
 
     $bus.on(:collides?) do |rect|
       next collides?(rect) ? :enemy : nil
@@ -78,7 +80,7 @@ class Enemy
     end
 
     player_pos = $bus.get(:player_position)
-    closest_event_horizon = $bus.get(:closest_event_horizon, @x, @y, 200)
+    closest_event_horizon = $bus.get(:closest_event_horizon, @x, @y, 2000)
     if closest_event_horizon
       @ai.update(*closest_event_horizon, dt, @last_lock != :event_horizon)
       @last_lock = :event_horizon
@@ -108,7 +110,8 @@ class Enemy
 
     # Health bar
 
-    health_width = (@w * @health / 100.0)
+    health_width = (@w * @health / @max_health)
+    Gosu::draw_rect(screen_x - @w / 2, screen_y - @h / 2 - 10, @w, 5, Gosu::Color.new(0xFF555555), Float::INFINITY)
     Gosu.draw_rect(screen_x - @w / 2, screen_y - @h / 2 - 10, health_width, 5, Gosu::Color.new(0xFF00FF00), Float::INFINITY)
 
     if $bus.get(:settings, :debug)

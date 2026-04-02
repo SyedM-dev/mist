@@ -26,12 +26,13 @@ class MazeData
       end
     end
 
+    $bus.on(:boss_rooms) do
+      next @boss_rooms
+    end
+
     return unless $bus.get(:settings, :debug)
 
     print_debug
-    $bus.on(:boss_room_coords) do
-      next @boss_rooms.first ? [@boss_rooms.first[0] * 2 + 1, @boss_rooms.first[1] * 2 + 1] : nil
-    end
   end
  
   def solve(x1, y1, x2, y2)

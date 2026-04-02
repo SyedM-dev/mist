@@ -2,8 +2,8 @@ So,
 
 #landmines and event horizon should be easy - done
 
-make enemy spawn in the boss rooms with randomness + enemy count
-make the lizard kind of enemy with very high health + dps but slow
+#make enemy spawn in the boss rooms with randomness + enemy count - done
+#make the lizard kind of enemy with very high health + dps but slow - done
 
 make blade work as planned
 make bow just normal
