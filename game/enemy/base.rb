@@ -58,6 +58,12 @@ class Enemy
   end
 
   def take_damage(amount)
+    # knockback a bit based on player position
+    player_x, player_y = $bus.get(:player_position) || [0, 0]
+    angle = Math.atan2(@y - player_y, @x - player_x)
+    knockback_distance = 10
+    @x += Math.cos(angle) * knockback_distance
+    @y += Math.sin(angle) * knockback_distance
     @health -= amount
     if @health <= 0
       $bus.emit(:enemy_died, self)

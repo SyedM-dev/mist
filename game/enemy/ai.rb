@@ -18,6 +18,7 @@ class EnemyAI
   end
 
   def update(player_x, player_y, dt, force = false)
+    distance = Math.hypot(@enemy.x - player_x, @enemy.y - player_y)
     if @enemy.lorentz && distance < 230
       @speed = @base_speed * 0.3
     else
@@ -65,7 +66,7 @@ class EnemyAI
             [center_x - CORNER_OFFSET, center_y + CORNER_OFFSET]
           ]
 
-          closest_idx = corners.each_with_index.min_by { |c, _| Gosu.distance(c[0], c[1], @enemy.x, @enemy.y) }[1]
+          closest_idx = corners.each_with_index.min_by { |c, _| Math.hypot(c[0] - @enemy.x, c[1] - @enemy.y) }[1]
           @waypoints = corners.rotate(closest_idx)
           @avoiding_obstacle = true
         end
@@ -131,12 +132,12 @@ class EnemyAI
         ]
 
         # first waypoint: corner closest to where we're coming from
-        first = corners.min_by { |cx, cy| Gosu.distance(cx, cy, prev_cx, prev_cy) }
+        first = corners.min_by { |cx, cy| Math.hypot(cx - prev_cx, cy - prev_cy) }
 
         # second waypoint: closest to next tile but not opposite to first
         opposite = [center_x - (first[0] - center_x), center_y - (first[1] - center_y)]
         candidates = corners.reject { |c| c == first || c == opposite }
-        second = candidates.min_by { |cx, cy| Gosu.distance(cx, cy, next_cx, next_cy) }
+        second = candidates.min_by { |cx, cy| Math.hypot(cx - next_cx, cy - next_cy) }
 
         waypoints << first
         waypoints << second
