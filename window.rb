@@ -1,11 +1,13 @@
 require 'opengl'
 require 'glu'
 require 'gosu'
+require 'json'
 
 require_relative 'settings/configuration'
 require_relative 'utils/utils'
 require_relative 'utils/scene'
 require_relative 'settings/scene'
+require_relative 'credits/scene'
 require_relative 'menu/scene'
 require_relative 'game_over/scene'
 require_relative 'game/scene'
@@ -68,13 +70,11 @@ class Window < Gosu::Window
 
     cam_x, cam_y = $bus.get(:camera_pos) || [0, 0]
     torch_lights = []
-    # Only calculate torch lights if the setting is enabled, to save performance
-    if $bus.get(:settings, :torches_lightup)
-      torches = $bus.get(:nearby_torches,
-      [cam_x - SCREEN_SIZE[0], cam_y - SCREEN_SIZE[1], SCREEN_SIZE[0] * 4, SCREEN_SIZE[1] * 4]
-      ) || []
-      torch_lights = torches.map { |t| [t[0] - cam_x, SCREEN_SIZE[1] - (t[1] - cam_y)] }.flatten
-    end
+
+    torches = $bus.get(:nearby_torches,
+    [cam_x - SCREEN_SIZE[0], cam_y - SCREEN_SIZE[1], SCREEN_SIZE[0] * 4, SCREEN_SIZE[1] * 4]
+    ) || []
+    torch_lights = torches.map { |t| [t[0] - cam_x, SCREEN_SIZE[1] - (t[1] - cam_y)] }.flatten
 
     lorentz_field = $bus.get(:lorentz_field) || 0.0
 

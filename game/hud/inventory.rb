@@ -94,19 +94,19 @@ class Inventory
     when Gosu::KB_1 then @inventory_selected = :occams_razor
     when Gosu::KB_2 then @inventory_selected = :quantum_bow
     when Gosu::KB_3 then @inventory_selected = :blade_of_recursion
-    when Gosu::KB_DOWN
+    when $bus.get(:settings, :"inventory down")
       row, col = find_slot(@inventory_selected)
       @inventory_selected = @grid[(row + 1) % @grid.size][col][0]
-    when Gosu::KB_UP
+    when $bus.get(:settings, :"inventory up")
       row, col = find_slot(@inventory_selected)
       @inventory_selected = @grid[(row - 1) % @grid.size][col][0]
-    when Gosu::KB_LEFT
+    when $bus.get(:settings, :"inventory left")
       row, col = find_slot(@inventory_selected)
       @inventory_selected = @grid[row][(col - 1) % @grid[row].size][0]
-    when Gosu::KB_RIGHT
+    when $bus.get(:settings, :"inventory right")
       row, col = find_slot(@inventory_selected)
       @inventory_selected = @grid[row][(col + 1) % @grid[row].size][0]
-    when Gosu::KB_RETURN
+    when $bus.get(:settings, :craft)
       craft(@inventory_selected, ctrl: Gosu.button_down?(Gosu::KB_RIGHT_CONTROL) || Gosu.button_down?(Gosu::KB_LEFT_CONTROL))
     else
       return false

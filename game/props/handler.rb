@@ -122,7 +122,7 @@ class PropsHandler
         @grid.delete([prop.x, prop.y])
       end
     end
-    if Gosu.button_down?(Gosu::KB_P) # place selected if it is a placeable item
+    if Gosu.button_down?($bus.get(:settings, :place))
       selected_item = $bus.get(:selected_item)
       if selected_item == :torch
         player_x, player_y = $bus.get(:player_position) || [0, 0]

@@ -2,6 +2,7 @@ class Menu < Scene
   OPTIONS = {
     "Start" => -> { $bus.emit(:change_scene, Game) },
     "Settings" => -> { $bus.emit(:change_scene, Settings) },
+    "Credits" => -> { $bus.emit(:change_scene, Credits) },
     "Quit" => -> { $bus.emit(:quit_game) }
   }.freeze
 

@@ -49,7 +49,7 @@ class Prop
   end
 
   def update(dt)
-    return unless Gosu.button_down?(Gosu::MS_LEFT) || Gosu.button_down?(Gosu::KB_X)
+    return unless Gosu.button_down?(Gosu::MS_LEFT) || Gosu.button_down?($bus.get(:settings, :break))
 
     player_x, player_y = $bus.get(:player_position) || [0, 0]
 

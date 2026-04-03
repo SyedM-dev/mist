@@ -76,10 +76,10 @@ class Character
     dx = 0.0
     dy = 0.0
 
-    dx -= 1 if Gosu.button_down?(Gosu::KB_A)
-    dx += 1 if Gosu.button_down?(Gosu::KB_D)
-    dy -= 1 if Gosu.button_down?(Gosu::KB_W)
-    dy += 1 if Gosu.button_down?(Gosu::KB_S)
+    dx -= 1 if Gosu.button_down?($bus.get(:settings, :leftward))
+    dx += 1 if Gosu.button_down?($bus.get(:settings, :rightward))
+    dy -= 1 if Gosu.button_down?($bus.get(:settings, :forward))
+    dy += 1 if Gosu.button_down?($bus.get(:settings, :backward))
 
     moving = dx != 0 || dy != 0
 

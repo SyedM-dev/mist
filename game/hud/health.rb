@@ -35,12 +35,12 @@ class HealthBar
 
   def draw
     # Draw the background of the health bar (red)
-    Gosu.draw_rect(SCREEN_SIZE[0] - 100 - 10, 180, 100, 10, Gosu::Color::RED)
+    Gosu.draw_rect(SCREEN_SIZE[0] - 100 - 10, 180, 100, 10, Gosu::Color::RED, Float::INFINITY)
 
     # Draw the foreground of the health bar (green) based on current health
     health_width = (health.to_f / max_health) * 100
-    Gosu.draw_rect(SCREEN_SIZE[0] - 100 - 10, 180, health_width, 10, Gosu::Color::GREEN)
+    Gosu.draw_rect(SCREEN_SIZE[0] - 100 - 10, 180, health_width, 10, Gosu::Color::GREEN, Float::INFINITY)
 
-    @heart_image.draw(SCREEN_SIZE[0] - 100 - 20, 173, 1, 1.5, 1.5)
+    @heart_image.draw(SCREEN_SIZE[0] - 100 - 20, 173, Float::INFINITY, 1.5, 1.5)
   end
 end

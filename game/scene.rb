@@ -27,7 +27,7 @@ class Game < Scene
 
     @camera = [0, 0]
 
-    $bus.emit(:log, "Welcome to the Mist! Use WASD to move, SPACE or left-click to attack with your equipped weapon, and ESC to return to the menu.")
+    $bus.emit(:log, "Welcome to the Mist!")
 
     $bus.on(:player_move) do |pos|
       @camera = pos
@@ -55,7 +55,7 @@ class Game < Scene
     @enemies.draw
     @props.draw
     @traps.draw
-    $bus.emit(:shade) if $bus.get(:settings, :fog)
+    $bus.emit(:shade)
     @hud.draw
     @weapons.draw
     draw_debug! if $bus.get(:settings, :debug)
@@ -98,7 +98,7 @@ class Game < Scene
   def button_down(id, pos)
     # Pressing ESC returns to the menu, this is bad but I don't have time to make a proper pause menu,
     # as the game has no persistent state outside of the current scene, just returning to the menu resets everything
-    return $bus.emit(:change_scene, Menu.new) if id == Gosu::KB_ESCAPE
+    return $bus.emit(:change_scene, Menu) if id == Gosu::KB_ESCAPE
 
     return if @hud.button_down(id, pos)
     return if @props.button_down(id, pos)
