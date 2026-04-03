@@ -17,21 +17,6 @@ class EventBus
     @events[event] << { callback: callback, owner: owner }
   end
 
-  # Subscribe to an event that should only be called once
-  def once(event, owner = nil, &callback)
-    wrapper = nil
-    wrapper = proc do |*args|
-      callback.call(*args)
-      off(event, &wrapper)
-    end
-    on(event, owner: owner, &wrapper)
-  end
-
-  # Unsubscribe from an event
-  def off(event, &callback)
-    @events[event].reject! { |h| h[:callback] == callback }
-  end
-
   # For events that return a value (e.g. queries), get the first non-nil response
   def get(event, *args)
     @events[event].dup.each do |h|

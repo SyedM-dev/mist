@@ -7,6 +7,7 @@ class MazeData
 
     @boss_rooms = []
     @start_room = nil
+    @exit_room = nil
 
     crate_rooms!
     carve_passages_from(0, 0)
