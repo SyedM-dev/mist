@@ -19,8 +19,12 @@ class MazeData
       next @start_room
     end
 
+    $bus.on(:exit_room_coords) do
+      next @exit_room
+    end
+
     $bus.on(:room?) do |gx, gy|
-      ([@start_room] + @boss_rooms).any? do |rx, ry|
+      ([@start_room, @exit_room] + @boss_rooms).any? do |rx, ry|
         gx.between?(rx, rx + BOSS_ROOM_SIZE) &&
         gy.between?(ry, ry + BOSS_ROOM_SIZE)
       end
@@ -28,6 +32,18 @@ class MazeData
 
     $bus.on(:boss_rooms) do
       next @boss_rooms
+    end
+
+    $bus.on(:maze_wall?) do |gx, gy|
+      next wall_at?(gx, gy)
+    end
+
+    $bus.on(:torch_placed) do |gx, gy|
+      # check for end condition, if torch is placed in exit room, change scene to victory
+      if (gx.between?(@exit_room[0], @exit_room[0] + BOSS_ROOM_SIZE - 1) &&
+          gy.between?(@exit_room[1], @exit_room[1] + BOSS_ROOM_SIZE - 1))
+        $bus.emit(:change_scene, GameOver)
+      end
     end
 
     return unless $bus.get(:settings, :debug)
@@ -113,7 +129,7 @@ class MazeData
   def wall_at?(gx, gy)
     return true if gx == 0 || gy == 0 || gx == width - 1 || gy == height - 1
 
-    @boss_rooms.each do |rx, ry|
+    (@boss_rooms + [@start_room, @exit_room]).each do |rx, ry|
       display_x1 = rx * 2 + 1
       display_y1 = ry * 2 + 1
       display_x2 = display_x1 + (BOSS_ROOM_SIZE - 1) * 2
@@ -184,7 +200,7 @@ class MazeData
   end
 
   def fix_room_entrances!
-    (@boss_rooms + [@start_room]).each do |x, y|
+    (@boss_rooms + [@start_room, @exit_room]).each do |x, y|
       dir = [N, S, E, W].sample
       cx = x + BOSS_ROOM_SIZE / 2
       cy = y + BOSS_ROOM_SIZE / 2
@@ -239,8 +255,26 @@ class MazeData
       rooms << [x, y]
     end
 
-    @start_room = rooms.shift
-    @boss_rooms = rooms
+    # assign the start and exit room to be the two furthest apart rooms
+    @start_room, @exit_room = furthest_pair(rooms)
+    @boss_rooms = rooms - [@start_room, @exit_room]
+  end
+
+  def furthest_pair(rects)
+    max_dist = -Float::INFINITY
+    pair = nil
+
+    rects.combination(2) do |r1, r2|
+      x1, y1 = r1
+      x2, y2 = r2
+      dist = Math.hypot(x2 - x1, y2 - y1)
+      if dist > max_dist
+        max_dist = dist
+        pair = [r1, r2]
+      end
+    end
+
+    pair
   end
 
   def carve_passages_from(cx, cy)

@@ -10,6 +10,6 @@ class Settings < Scene
   end
 
   def button_down(id, _pos)
-    $bus.emit(:change_scene, Menu.new) if id == Gosu::KB_ESCAPE
+    $bus.emit(:change_scene, Menu) if id == Gosu::KB_ESCAPE
   end
 end

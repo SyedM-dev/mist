@@ -11,6 +11,8 @@ class BladeOfRecursion
 
     # the knife is pointed top-right
     @sprite = Gosu::Image.new('assets/images/blade_of_recursion.png', retro: true)
+
+    @memory_sprite = Gosu::Image.new('assets/images/memory.png', retro: true)
   end
 
   def attack(direction)
@@ -72,10 +74,9 @@ class BladeOfRecursion
     # this should be in the HUD layer but due to time constraints im putting it here, sorry
     bar_width  = 100
     bar_height = 10
-    padding    = 10
 
-    bar_x = SCREEN_SIZE[0] - bar_width - padding
-    bar_y = padding
+    bar_x = SCREEN_SIZE[0] - bar_width - 10
+    bar_y = 205
 
     # full red background
     Gosu.draw_rect(bar_x, bar_y, bar_width, bar_height, Gosu::Color::RED, Float::INFINITY)
@@ -84,5 +85,7 @@ class BladeOfRecursion
     damage_ratio = Math.log2(@damage) / 9.0
     damage_width = bar_width * [damage_ratio, 1.0].min
     Gosu.draw_rect(bar_x, bar_y, damage_width, bar_height, Gosu::Color::GREEN, Float::INFINITY)
+
+    @memory_sprite.draw(bar_x - 10, bar_y - 7, Float::INFINITY, 1.5, 1.5)
   end
 end

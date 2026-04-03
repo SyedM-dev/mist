@@ -9,6 +9,8 @@ require_relative 'character'
 class Game < Scene
   def initialize
     super
+    $is_dead = false
+
     @font = Gosu::Font.new(24)
     @floor_image = Gosu::Image.new("assets/images/floor.png", retro: true)
 
@@ -94,6 +96,8 @@ class Game < Scene
   end
 
   def button_down(id, pos)
+    # Pressing ESC returns to the menu, this is bad but I don't have time to make a proper pause menu,
+    # as the game has no persistent state outside of the current scene, just returning to the menu resets everything
     return $bus.emit(:change_scene, Menu.new) if id == Gosu::KB_ESCAPE
 
     return if @hud.button_down(id, pos)

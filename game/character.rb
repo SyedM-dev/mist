@@ -126,11 +126,11 @@ class Character
       $bus.emit(:trap_stepped_on, rect, :character)
     end
 
-    # teleport to boss room for debug purposes
+    # teleport to exit room for debug purposes
     if $bus.get(:settings, :debug) && Gosu.button_down?(Gosu::KB_T)
-      room_coords = $bus.get(:boss_room_coords)
+      room_coords = $bus.get(:exit_room_coords)
       if room_coords
-        @world_x, @world_y = [room_coords[0] * 60 + 5, room_coords[1] * 60 + 5]
+        @world_x, @world_y = [room_coords[0] * 120 + 90, room_coords[1] * 120 + 90]
       end
     end
 

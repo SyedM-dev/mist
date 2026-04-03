@@ -8,7 +8,7 @@ class GameOver < Scene
     super
     @font = Gosu::Font.new(32, name: "assets/fonts/tn.ttf")
     @selected_index = 0
-    @bg_image = Gosu::Image.new("assets/images/game_over_bg.png", retro: true)
+    @bg_image = Gosu::Image.new("assets/images/game_over_#{$is_dead ? 'dead' : 'victory'}_bg.png", retro: true)
     @last_mouse_pos = nil
   end
 

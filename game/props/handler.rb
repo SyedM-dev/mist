@@ -22,6 +22,34 @@ class PropsHandler
     $bus.on(:nearby_torches) do |rect|
       nearby_props(rect).select { |p| p.is_a?(Torch) }.map(&:rect).map { |t| [t[0] + t[2] / 2, t[1] + t[3] / 2] }
     end
+
+    $bus.on(:radar_triangulation?) do |player_x, player_y|
+      radar_triangulation?(player_x, player_y)
+    end
+  end
+
+  def radar_triangulation?(player_x, player_y)
+    # small rect around player to find the first radar
+    small_rect = [player_x - 60, player_y - 60, 120, 120] # 1 block radius
+    first_radar = nearby_props(small_rect).find { |p| p.is_a?(Radar) }
+    return false unless first_radar
+
+    # larger rect to find other radars (max 15 blocks away, 15*120 pixels)
+    large_rect = [first_radar.x * 120 - 15 * 120, first_radar.y * 120 - 15 * 120, 30 * 120, 30 * 120]
+    nearby_radars = nearby_props(large_rect).select { |p| p.is_a?(Radar) }
+
+    # need at least 3 radars total
+    return false if nearby_radars.size < 3
+
+    nearby_radars.combination(3).any? do |r1, r2, r3|
+      next unless r1 == first_radar || r2 == first_radar || r3 == first_radar
+
+      d1 = Math.hypot((r1.x - r2.x), (r1.y - r2.y))
+      d2 = Math.hypot((r1.x - r3.x), (r1.y - r3.y))
+      d3 = Math.hypot((r2.x - r3.x), (r2.y - r3.y))
+
+      [d1, d2, d3].all? { |d| d >= 3 && d <= 15 }
+    end
   end
 
   def spawn_chests!
@@ -49,7 +77,7 @@ class PropsHandler
       end
     end
 
-    # Add one in the start room for players to have something to interact with right away
+    # Add one in the start room for players to have something right away
     start_room_x, start_room_y = $bus.get(:start_room_coords) || [0, 0]
     x, y = [
       [start_room_x, start_room_y],
@@ -103,6 +131,7 @@ class PropsHandler
         return if @grid[[tile[0], tile[1]]] # can't place if something is already there
         return if $bus.get_all(:collides?, torch.collision_rect).include?(:character) # can't place if colliding with player
         return unless $bus.get(:consume, :torch, 1)
+        $bus.emit(:torch_placed, torch.x, torch.y)
         add(torch)
       elsif selected_item == :radar
         player_x, player_y = $bus.get(:player_position) || [0, 0]
